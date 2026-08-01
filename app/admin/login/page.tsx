@@ -4,10 +4,8 @@ import React, { useState } from "react";
 import { loginAdmin } from "@/lib/actions";
 import { Shield, User, ArrowLeft, KeyRound } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,12 +17,8 @@ export default function AdminLoginPage() {
     const formData = new FormData(e.currentTarget);
     const res = await loginAdmin(null, formData);
 
-    setLoading(false);
-
-    if (res.success) {
-      router.push("/admin");
-      router.refresh();
-    } else {
+    if (res && !res.success) {
+      setLoading(false);
       setError(res.error || "Login failed.");
     }
   };

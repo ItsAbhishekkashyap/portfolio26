@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { connectToDatabase } from "@/lib/mongodb";
 import Project from "@/models/Project";
 import Contact from "@/models/Contact";
@@ -78,7 +79,7 @@ export async function loginAdmin(prevState: any, formData: FormData) {
   if (username === validUsername && password === validPassword) {
     const token = signToken(username);
     await setAdminCookie(token);
-    return { success: true, message: "Logged in successfully!" };
+    redirect("/admin");
   }
 
   return { success: false, error: "Invalid username or password credentials." };
@@ -89,7 +90,7 @@ export async function logoutAdmin() {
   await clearAdminCookie();
   revalidatePath("/");
   revalidatePath("/admin");
-  return { success: true };
+  redirect("/admin/login");
 }
 
 // Get All Projects Action
