@@ -23,9 +23,9 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://abhishekgond.vercel.app"),
-  title: "Abhishek Gond | Aspiring Software Engineer",
+  title: "Abhishek Gond | Full-Stack Software Engineer & High Agency Fellow",
   description:
-    "Personal Portfolio of Abhishek Gond — Aspiring Software Engineer | B.Tech ECE candidate at IET Lucknow (7.85 CGPA). Solved 400+ DSA problems.",
+    "Personal Portfolio of Abhishek Gond — Full-Stack Software Engineer & High Agency Fellow at Panscience Innovations. B.Tech ECE candidate at IET Lucknow (7.85 CGPA). Solved 400+ DSA problems.",
   keywords: [
     "Abhishek Gond",
     "Abhishek Gond Portfolio",
@@ -108,7 +108,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#fbf9f5] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 antialiased min-h-screen transition-colors duration-300">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           {children}
         </ThemeProvider>
       </body>
