@@ -54,10 +54,11 @@ export default function Hero() {
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.2"><circle cx="12" cy="12" r="10" /><ellipse cx="12" cy="12" rx="4.2" ry="10" /><path d="M2 12h20M4 6.5h16M4 17.5h16" /></svg>
         </span>
       </div>
-      <div className="hero-status"><i />{PROFILE.status}</div>
+      {/* Role and status pill share one stacked block so they can't collide at any screen height. */}
       <div className="hero-role">
         <svg className="arrow" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M1 1l12 12M13 3v10H3" /></svg>
-        {PROFILE.role}<br />{PROFILE.roleLine2}
+        <span>{PROFILE.role}<br />{PROFILE.roleLine2}</span>
+        <div className="hero-status"><i />{PROFILE.status}</div>
       </div>
       <div className="hero-marquee" aria-hidden="true">
         <div className="slider" ref={slider}>
