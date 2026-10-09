@@ -9,28 +9,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
-        cyber: {
-          50: "#f0fdfa",
-          100: "#ccfbf1",
-          400: "#2dd4bf",
-          500: "#14b8a6",
-          600: "#0d9488",
-          900: "#134e4a",
-          glow: "#00f2fe",
-          violet: "#7928ca",
-          pink: "#ff0080",
+        background: "#0a0a0a", // Charcoal/near-black base
+        foreground: "#f5f5f5", // Off-white
+        accent: {
+          DEFAULT: "#F59B0B", // Electric accent
+          glow: "rgba(245, 155, 11, 0.3)",
         },
+        surface: {
+          light: "#1a1a1a",
+          DEFAULT: "#121212",
+          dark: "#080808",
+        }
       },
       fontFamily: {
         sans: ["var(--font-inter)", "sans-serif"],
-        mono: ["var(--font-jet-brains)", "monospace"],
+        display: ["var(--font-display)", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
       },
       boxShadow: {
-        glow: "0 0 20px -5px rgba(0, 242, 254, 0.3)",
-        "glow-lg": "0 0 35px -5px rgba(121, 40, 202, 0.4)",
-        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+        glow: "0 0 20px -5px rgba(245, 155, 11, 0.3)",
+        "glow-lg": "0 0 35px -5px rgba(245, 155, 11, 0.4)",
       },
     },
   },

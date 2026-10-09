@@ -1,10 +1,11 @@
-"use client";
+﻿"use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Command, Download, Sun, Moon, Briefcase, FolderGit2, SlidersHorizontal, Calendar, Github, Linkedin, ExternalLink, X, FileText } from "lucide-react";
+import { Search, Folder, User, Terminal, Code2, ArrowRight, Download, Mail, Activity, Github, Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { PERSONA } from "@/lib/seed-data";
-import { useTheme } from "next-themes";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -14,209 +15,108 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ isOpen, onClose, onOpenResume, onOpenSchedule }: CommandPaletteProps) {
-  const { theme, setTheme } = useTheme();
   const [query, setQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
-      setQuery("");
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
-        if (isOpen) onClose();
-        else onClose();
+        isOpen ? onClose() : document.dispatchEvent(new CustomEvent("open-command-palette"));
+      }
+      if (e.key === "Escape" && isOpen) {
+        onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  const items = [
-    {
-      id: "projects",
-      title: "View Featured Projects",
-      subtitle: "AyuNidan AI, Branqly SaaS, MenuLuxe SaaS, Placement Portal",
-      icon: FolderGit2,
-      action: () => {
-        document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
-        onClose();
-      },
-    },
-    {
-      id: "experience",
-      title: "View Work Experience & Milestones",
-      subtitle: "Panscience Innovations & Durga Foundation",
-      icon: Briefcase,
-      action: () => {
-        document.getElementById("experience")?.scrollIntoView({ behavior: "smooth" });
-        onClose();
-      },
-    },
-    {
-      id: "skills",
-      title: "View Visual Skill Matrix",
-      subtitle: "Languages, Frameworks, Databases, Tools, Core CS",
-      icon: SlidersHorizontal,
-      action: () => {
-        document.getElementById("skills")?.scrollIntoView({ behavior: "smooth" });
-        onClose();
-      },
-    },
-    {
-      id: "download-resume",
-      title: "Download Resume PDF",
-      subtitle: "Directly download Abhishek_Gond_Resume.pdf",
-      icon: Download,
-      action: () => {
-        window.open(PERSONA.resumeUrl, "_blank");
-        onClose();
-      },
-    },
-    {
-      id: "resume-modal",
-      title: "Open Interactive Resume Overview",
-      subtitle: "Interactive inline resume preview",
-      icon: FileText,
-      action: () => {
-        onClose();
-        onOpenResume();
-      },
-    },
-    {
-      id: "schedule",
-      title: "Schedule 15-Min Discussion / Call",
-      subtitle: "Calendar invite request modal",
-      icon: Calendar,
-      action: () => {
-        onClose();
-        onOpenSchedule();
-      },
-    },
-    {
-      id: "theme",
-      title: `Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`,
-      subtitle: "Toggle global website color system",
-      icon: theme === "dark" ? Sun : Moon,
-      action: () => {
-        setTheme(theme === "dark" ? "light" : "dark");
-        onClose();
-      },
-    },
-    {
-      id: "leetcode",
-      title: "Open LeetCode Profile",
-      subtitle: "400+ Solved, 1404 Contest Rating, 60-Day Streak",
-      icon: ExternalLink,
-      action: () => {
-        window.open(PERSONA.socials.leetcode, "_blank");
-        onClose();
-      },
-    },
-    {
-      id: "github",
-      title: "Open GitHub Profile",
-      subtitle: "github.com/ItsAbhishekkashyap",
-      icon: Github,
-      action: () => {
-        window.open(PERSONA.socials.github, "_blank");
-        onClose();
-      },
-    },
+  const COMMANDS = [
+    { id: "work", name: "View Selected Works", icon: Folder, action: () => { window.location.hash = "#work"; onClose(); } },
+    { id: "journey", name: "View Engineering Journey", icon: Activity, action: () => { window.location.hash = "#journey"; onClose(); } },
+    { id: "skills", name: "View Tech Constellation", icon: Code2, action: () => { window.location.hash = "#skills"; onClose(); } },
+    { id: "lab", name: "Explore Digital Lab", icon: Terminal, action: () => { window.location.hash = "#lab"; onClose(); } },
+    { id: "contact", name: "Contact & Discussion", icon: Mail, action: () => { window.location.hash = "#contact"; onClose(); } },
+    { id: "resume", name: "Download PDF Resume", icon: Download, action: () => { onOpenResume(); onClose(); } },
+    { id: "schedule", name: "Schedule a Meeting", icon: User, action: () => { onOpenSchedule(); onClose(); } },
+    { id: "github", name: "View GitHub Profile", icon: Github, action: () => { window.open(PERSONA.socials.github, "_blank"); onClose(); } },
+    { id: "admin", name: "Access Admin CMS", icon: Shield, action: () => { window.location.href = "/admin/login"; onClose(); } },
   ];
 
-  const filteredItems = items.filter(
-    (item) =>
-      item.title.toLowerCase().includes(query.toLowerCase()) ||
-      item.subtitle.toLowerCase().includes(query.toLowerCase())
-  );
-
-  if (!isOpen) return null;
+  const filteredCommands = COMMANDS.filter(cmd => cmd.name.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 overflow-hidden flex items-start justify-center pt-20 p-4">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="fixed inset-0 bg-stone-950/70 dark:bg-stone-950/85 backdrop-blur-sm"
-        />
+      {isOpen && (
+        <div className="fixed inset-0 z-[200] flex items-start justify-center pt-[20vh]">
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-background/80 backdrop-blur-md"
+          />
 
-        {/* Spotlight Command Dialog */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: -10 }}
-          className="relative w-full max-w-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl shadow-2xl overflow-hidden z-10 text-stone-900 dark:text-stone-100 flex flex-col transition-colors"
-        >
-          {/* Search Bar Input */}
-          <div className="p-4 border-b border-stone-200 dark:border-stone-800 flex items-center gap-3">
-            <Search className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search projects, skills, resume, commands... (Esc to close)"
-              className="w-full bg-transparent text-sm text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none font-medium"
-            />
-            <button onClick={onClose} className="p-1 rounded text-stone-400 hover:text-stone-900 dark:hover:text-stone-100">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Items List */}
-          <div className="max-h-80 overflow-y-auto p-2 space-y-1">
-            {filteredItems.map((item) => {
-              const IconComp = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={item.action}
-                  className="w-full p-3 rounded-xl hover:bg-amber-50 dark:hover:bg-stone-800 flex items-center justify-between text-left transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-stone-100 dark:bg-stone-950 text-stone-700 dark:text-amber-400 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                      <IconComp className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-stone-900 dark:text-stone-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
-                        {item.title}
-                      </p>
-                      <p className="text-[11px] text-stone-500 dark:text-stone-400">{item.subtitle}</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 font-bold">Select →</span>
-                </button>
-              );
-            })}
-
-            {filteredItems.length === 0 && (
-              <div className="p-8 text-center text-xs text-stone-500 font-mono">
-                No matching results found for &quot;{query}&quot;.
-              </div>
-            )}
-          </div>
-
-          {/* Footer Shortcuts Hint */}
-          <div className="bg-[#fbf9f5] dark:bg-stone-950 px-4 py-2.5 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between text-[10px] font-mono text-stone-500">
-            <span>Abhishek Gond Spotlight Search</span>
-            <div className="flex items-center gap-2">
-              <span className="bg-stone-200 dark:bg-stone-800 px-1.5 py-0.5 rounded text-stone-700 dark:text-stone-300">⌘K</span>
-              <span>to toggle</span>
+          {/* Palette */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="relative w-full max-w-2xl bg-surface border border-white/10 shadow-2xl shadow-black/50 rounded-2xl overflow-hidden"
+          >
+            {/* Search Input */}
+            <div className="flex items-center px-4 border-b border-white/5">
+              <Search className="w-5 h-5 text-stone-500" />
+              <input
+                autoFocus
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search commands or navigate..."
+                className="w-full bg-transparent border-none text-stone-200 placeholder:text-stone-600 focus:ring-0 px-4 py-5 font-mono text-sm outline-none"
+              />
+              <span className="text-[10px] text-stone-600 font-mono border border-white/10 px-2 py-1 rounded bg-white/5">ESC</span>
             </div>
-          </div>
-        </motion.div>
-      </div>
+
+            {/* Command List */}
+            <div className="max-h-[60vh] overflow-y-auto p-2">
+              {filteredCommands.length > 0 ? (
+                <div className="space-y-1">
+                  {filteredCommands.map((cmd) => (
+                    <button
+                      key={cmd.id}
+                      onClick={cmd.action}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl hover:bg-white/5 group transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="text-stone-500 group-hover:text-accent transition-colors">
+                          <cmd.icon className="w-5 h-5" />
+                        </div>
+                        <span className="text-sm font-sans text-stone-300 group-hover:text-white transition-colors">{cmd.name}</span>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-stone-600 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="px-4 py-12 text-center text-sm font-mono text-stone-500">
+                  No commands found.
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-4 py-3 border-t border-white/5 bg-background flex items-center justify-between">
+              <span className="text-[10px] font-mono text-stone-600 uppercase tracking-widest">AG Command Palette</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-stone-600">Navigation system</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AnimatePresence>
   );
 }

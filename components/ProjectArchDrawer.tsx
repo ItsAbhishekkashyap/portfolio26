@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Cpu, Lock, Database, Zap, Globe, CheckCircle2, ExternalLink, Github } from "lucide-react";
+import { X, ExternalLink, Github } from "lucide-react";
 import { ProjectData } from "@/lib/seed-data";
+import gsap from "gsap";
 
 interface ProjectArchDrawerProps {
   project: ProjectData | null;
@@ -11,149 +12,120 @@ interface ProjectArchDrawerProps {
 }
 
 export default function ProjectArchDrawer({ project, onClose }: ProjectArchDrawerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (project && containerRef.current) {
+      const nodes = containerRef.current.querySelectorAll(".arch-node");
+      const lines = containerRef.current.querySelectorAll(".arch-line path");
+
+      gsap.fromTo(nodes, 
+        { opacity: 0, y: 20 }, 
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out", delay: 0.2 }
+      );
+      
+      gsap.fromTo(lines, 
+        { strokeDasharray: 1000, strokeDashoffset: 1000 }, 
+        { strokeDashoffset: 0, duration: 1, ease: "power2.inOut", delay: 0.5 }
+      );
+    }
+  }, [project]);
+
   if (!project) return null;
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 overflow-hidden flex justify-end">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[100] bg-background/90 backdrop-blur-xl flex flex-col justify-center items-center overflow-y-auto"
+      >
+        <button
           onClick={onClose}
-          className="fixed inset-0 bg-stone-950/70 backdrop-blur-sm"
-        />
-
-        {/* Slide-over Drawer Panel */}
-        <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="relative w-full max-w-lg bg-white dark:bg-stone-900 border-l border-stone-200 dark:border-stone-800 shadow-2xl p-6 overflow-y-auto z-10 flex flex-col justify-between text-stone-900 dark:text-stone-100 transition-colors"
+          className="absolute top-8 right-8 font-display font-medium text-sm tracking-widest uppercase hover:text-accent transition-colors flex items-center gap-2"
         >
-          <div>
-            {/* Header & Close Button */}
-            <div className="flex items-center justify-between border-b border-stone-200 dark:border-stone-800 pb-4 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-bold">
-                  <Cpu className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-stone-900 dark:text-stone-100 font-heading">{project.title}</h3>
-                  <p className="text-xs text-amber-700 dark:text-amber-400 font-mono font-semibold">{project.subtitle}</p>
-                </div>
-              </div>
+          Close <X className="w-5 h-5" />
+        </button>
 
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-                title="Close Architecture Drawer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+        <div className="w-full max-w-screen-xl mx-auto px-6 py-24 flex flex-col items-center">
+          <h3 className="font-display text-3xl md:text-5xl font-medium tracking-tighter uppercase mb-4 text-center">
+            {project.title} <br/>
+            <span className="text-stone-500">Architecture</span>
+          </h3>
+
+          {/* Abstract Architecture Flow */}
+          <div ref={containerRef} className="relative w-full max-w-3xl mt-16 flex flex-col items-center gap-12">
+            
+            {/* Node 1 */}
+            <div className="arch-node w-64 p-6 border border-white/10 bg-surface rounded-xl flex flex-col items-center text-center z-10 relative group hover:border-accent transition-colors">
+              <span className="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-2 block">Frontend / Client</span>
+              <span className="font-sans text-sm text-stone-200">Next.js / React / TypeScript</span>
             </div>
 
-            {/* Overview */}
-            <div className="mb-6">
-              <h4 className="text-xs uppercase font-mono tracking-wider text-amber-700 dark:text-amber-400 mb-2 font-bold">Project Overview</h4>
-              <p className="text-sm text-stone-600 dark:text-stone-300 leading-relaxed bg-[#fbf9f5] dark:bg-stone-950 p-4 rounded-xl border border-stone-200 dark:border-stone-800 font-sans">
-                {project.description}
-              </p>
+            {/* Line down */}
+            <svg className="arch-line absolute left-1/2 -translate-x-1/2 w-2 h-16 top-[5.5rem] -z-10" viewBox="0 0 2 64">
+              <path d="M1 0V64" fill="none" stroke="rgba(204,255,0,0.3)" strokeWidth="2" strokeDasharray="4 4" />
+            </svg>
+
+            {/* Node 2 */}
+            <div className="arch-node w-64 p-6 border border-white/10 bg-surface rounded-xl flex flex-col items-center text-center z-10 relative group hover:border-accent transition-colors">
+              <span className="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-2 block">API & Compute</span>
+              <span className="font-sans text-sm text-stone-200">{project.architecture.apis}</span>
             </div>
 
-            {/* Architecture Highlights Grid */}
-            <div className="space-y-4 mb-6">
-              <h4 className="text-xs uppercase font-mono tracking-wider text-amber-700 dark:text-amber-400 font-bold">System Architecture Matrix</h4>
+            {/* Fork Lines */}
+            <svg className="arch-line absolute left-1/2 -translate-x-1/2 w-64 h-16 top-[15rem] -z-10" viewBox="0 0 256 64">
+              <path d="M128 0V32H2V64" fill="none" stroke="rgba(204,255,0,0.3)" strokeWidth="2" />
+              <path d="M128 0V32H254V64" fill="none" stroke="rgba(204,255,0,0.3)" strokeWidth="2" />
+            </svg>
 
-              {/* Auth */}
-              <div className="p-3.5 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-stone-900 dark:text-stone-100 font-heading">Authentication & Security</p>
-                  <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 font-sans">{project.architecture?.auth || "Standard JWT"}</p>
-                </div>
+            {/* Node 3 & 4 */}
+            <div className="flex gap-16 w-full justify-center mt-4">
+              <div className="arch-node w-48 p-6 border border-white/10 bg-surface rounded-xl flex flex-col items-center text-center z-10 relative group hover:border-accent transition-colors">
+                <span className="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-2 block">Auth / Security</span>
+                <span className="font-sans text-sm text-stone-200">{project.architecture.auth}</span>
               </div>
-
-              {/* Database */}
-              <div className="p-3.5 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                  <Database className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-stone-900 dark:text-stone-100 font-heading">Database & Schemas</p>
-                  <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 font-sans">{project.architecture?.database || "MongoDB / Mongoose"}</p>
-                </div>
-              </div>
-
-              {/* Caching */}
-              <div className="p-3.5 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                  <Zap className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-stone-900 dark:text-stone-100 font-heading">Caching & Performance</p>
-                  <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 font-sans">{project.architecture?.caching || "Redis & Edge SWR"}</p>
-                </div>
-              </div>
-
-              {/* APIs */}
-              <div className="p-3.5 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 shrink-0">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-stone-900 dark:text-stone-100 font-heading">APIs & Integrations</p>
-                  <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5 font-sans">{project.architecture?.apis || "REST & Server Actions"}</p>
-                </div>
+              <div className="arch-node w-48 p-6 border border-white/10 bg-surface rounded-xl flex flex-col items-center text-center z-10 relative group hover:border-accent transition-colors">
+                <span className="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-2 block">Caching</span>
+                <span className="font-sans text-sm text-stone-200">{project.architecture.caching}</span>
               </div>
             </div>
 
-            {/* Key System Highlights Bullet Points */}
-            {project.architecture?.systemHighlights && project.architecture.systemHighlights.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-xs uppercase font-mono tracking-wider text-amber-700 dark:text-amber-400 mb-3 font-bold">Key Technical Achievements</h4>
-                <ul className="space-y-2">
-                  {project.architecture.systemHighlights.map((hl, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5 text-xs text-stone-700 dark:text-stone-300 bg-[#fbf9f5] dark:bg-stone-950 p-3 rounded-xl border border-stone-200 dark:border-stone-800 font-sans">
-                      <CheckCircle2 className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                      <span>{hl}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* Join Lines */}
+            <svg className="arch-line absolute left-1/2 -translate-x-1/2 w-64 h-16 top-[26rem] -z-10" viewBox="0 0 256 64">
+              <path d="M2 0V32H128V64" fill="none" stroke="rgba(204,255,0,0.3)" strokeWidth="2" />
+              <path d="M254 0V32H128V64" fill="none" stroke="rgba(204,255,0,0.3)" strokeWidth="2" />
+            </svg>
+
+            {/* Node 5 */}
+            <div className="arch-node w-64 p-6 border border-white/10 bg-surface rounded-xl flex flex-col items-center text-center z-10 relative group hover:border-accent transition-colors mt-4">
+              <span className="font-mono text-[10px] text-stone-500 uppercase tracking-widest mb-2 block">Database / State</span>
+              <span className="font-sans text-sm text-stone-200">{project.architecture.database}</span>
+            </div>
+            
           </div>
 
-          {/* Footer Action Buttons */}
-          <div className="pt-4 border-t border-stone-200 dark:border-stone-800 flex items-center gap-3">
-            <a
-              href={project.liveLink}
-              target="_blank"
-              rel="noreferrer"
-              className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs flex items-center justify-center gap-2 shadow-sm font-mono"
-            >
-              <span>Visit Live Demo</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-
-            {project.githubLink && (
-              <a
-                href={project.githubLink}
-                target="_blank"
-                rel="noreferrer"
-                className="py-2.5 px-4 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-800 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 font-bold text-xs flex items-center justify-center gap-2 font-mono"
-              >
-                <Github className="w-4 h-4" />
-                <span>Source</span>
+          {/* Action Buttons */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="mt-24 flex items-center gap-4"
+          >
+            {project.liveLink && (
+              <a href={project.liveLink} target="_blank" className="px-6 py-3 bg-white/5 hover:bg-accent hover:text-black border border-white/10 hover:border-accent transition-all duration-300 rounded-full font-mono text-xs uppercase tracking-widest flex items-center gap-2">
+                <span>View Live</span> <ExternalLink className="w-3 h-3" />
               </a>
             )}
-          </div>
-        </motion.div>
-      </div>
+            {project.githubLink && (
+              <a href={project.githubLink} target="_blank" className="px-6 py-3 bg-white/5 hover:bg-white hover:text-black border border-white/10 hover:border-white transition-all duration-300 rounded-full font-mono text-xs uppercase tracking-widest flex items-center gap-2">
+                <span>Source</span> <Github className="w-3 h-3" />
+              </a>
+            )}
+          </motion.div>
+        </div>
+      </motion.div>
     </AnimatePresence>
   );
 }

@@ -1,64 +1,70 @@
 "use client";
 
-import React, { useState } from "react";
-import { ProjectData } from "@/lib/seed-data";
-import { createProjectAction, updateProjectAction, deleteProjectAction, logoutAdmin } from "@/lib/actions";
-import { Shield, Plus, Trash2, Edit3, LogOut, CheckCircle2, MessageSquare, ExternalLink, RefreshCw } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { ArrowUpRight, Edit3, LogOut, Trash2, Plus } from "lucide-react";
+import { ProjectData } from "@/lib/seed-data";
+import { createProjectAction, updateProjectAction, deleteProjectAction, logoutAdmin, sendTestWhatsAppAction } from "@/lib/actions";
 
 interface AdminDashboardProps {
   initialProjects: ProjectData[];
   contacts: any[];
+  whatsapp: { configured: boolean; mode: "template" | "text" | "off"; to: string };
 }
 
-export default function AdminDashboard({ initialProjects, contacts }: AdminDashboardProps) {
+const CATEGORIES = ["AI & Full-Stack", "SaaS & Web3/SaaS", "SaaS & Mobile Web", "Full-Stack Web"];
+
+const EMPTY: Partial<ProjectData> = {
+  id: "",
+  title: "",
+  subtitle: "",
+  description: "",
+  techBadges: [],
+  liveLink: "",
+  githubLink: "",
+  category: "Full-Stack Web",
+  featured: true,
+  architecture: { auth: "JWT", database: "MongoDB", caching: "Redis", apis: "REST API", systemHighlights: [] },
+};
+
+type Toast = { text: string; kind: "ok" | "error" } | null;
+
+const formatDate = (d: any) => {
+  const date = d ? new Date(d) : null;
+  if (!date || isNaN(date.getTime())) return "Date unknown";
+  return date.toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
+};
+
+export default function AdminDashboard({ initialProjects, contacts, whatsapp }: AdminDashboardProps) {
+  const [testing, setTesting] = useState(false);
   const [projects, setProjects] = useState<ProjectData[]>(initialProjects);
   const [activeTab, setActiveTab] = useState<"projects" | "contacts">("projects");
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
-
-  // Form State
-  const [formData, setFormData] = useState<Partial<ProjectData>>({
-    id: "",
-    title: "",
-    subtitle: "",
-    description: "",
-    techBadges: [],
-    liveLink: "",
-    githubLink: "",
-    category: "Full-Stack Web",
-    featured: true,
-    architecture: {
-      auth: "JWT",
-      database: "MongoDB",
-      caching: "Redis",
-      apis: "REST API",
-      systemHighlights: [],
-    },
-  });
-
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<Partial<ProjectData>>(EMPTY);
   const [techBadgeInput, setTechBadgeInput] = useState("");
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [toast, setToast] = useState<Toast>(null);
+  const toastTimer = useRef<number>();
+  const formRef = useRef<HTMLDivElement>(null);
+
+  const notify = (text: string, kind: "ok" | "error" = "ok") => {
+    setToast({ text, kind });
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3200);
+  };
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  const unread = contacts.filter((c) => !c.status || c.status === "unread").length;
+  const latest = contacts.length ? formatDate(contacts[0].createdAt).split(",")[0] : "None yet";
+  const categories = useMemo(() => {
+    const list = [...CATEGORIES];
+    if (formData.category && !list.includes(formData.category)) list.unshift(formData.category);
+    return list;
+  }, [formData.category]);
 
   const resetForm = () => {
-    setFormData({
-      id: "",
-      title: "",
-      subtitle: "",
-      description: "",
-      techBadges: [],
-      liveLink: "",
-      githubLink: "",
-      category: "Full-Stack Web",
-      featured: true,
-      architecture: {
-        auth: "JWT",
-        database: "MongoDB",
-        caching: "Redis",
-        apis: "REST API",
-        systemHighlights: [],
-      },
-    });
+    setFormData(EMPTY);
     setTechBadgeInput("");
     setIsEditing(false);
   };
@@ -66,319 +72,237 @@ export default function AdminDashboard({ initialProjects, contacts }: AdminDashb
   const handleEdit = (project: ProjectData) => {
     setFormData(project);
     setIsEditing(true);
+    setConfirmId(null);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this project?")) return;
     setLoading(true);
     const res = await deleteProjectAction(id);
     setLoading(false);
+    setConfirmId(null);
     if (res.success) {
       setProjects((prev) => prev.filter((p) => p.id !== id));
-      setFeedback("Project deleted successfully.");
-      setTimeout(() => setFeedback(null), 3000);
+      if (isEditing && formData.id === id) resetForm();
+      notify("Project deleted.");
+    } else {
+      notify(res.error || "The project couldn't be deleted. Try again.", "error");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setFeedback(null);
 
     const projectToSave = {
       ...formData,
       id: formData.id || formData.title?.toLowerCase().replace(/\s+/g, "-") || Date.now().toString(),
     } as ProjectData;
 
-    let res;
-    if (isEditing) {
-      res = await updateProjectAction(projectToSave.id, projectToSave);
-    } else {
-      res = await createProjectAction(projectToSave);
-    }
+    const res = isEditing
+      ? await updateProjectAction(projectToSave.id, projectToSave)
+      : await createProjectAction(projectToSave);
 
     setLoading(false);
 
     if (res.success) {
-      if (isEditing) {
-        setProjects((prev) => prev.map((p) => (p.id === projectToSave.id ? projectToSave : p)));
-      } else {
-        setProjects((prev) => [projectToSave, ...prev]);
-      }
-      setFeedback(res.message || "Project saved successfully.");
+      if (isEditing) setProjects((prev) => prev.map((p) => (p.id === projectToSave.id ? projectToSave : p)));
+      else setProjects((prev) => [projectToSave, ...prev]);
+      notify(isEditing ? "Project updated." : "Project created.");
       resetForm();
-      setTimeout(() => setFeedback(null), 3000);
     } else {
-      alert(res.error);
+      notify(res.error || "The project couldn't be saved. Check the fields and try again.", "error");
     }
+  };
+
+  const handleTestWhatsApp = async () => {
+    setTesting(true);
+    try {
+      const res = await sendTestWhatsAppAction();
+      notify(res.success ? res.message! : res.error || "The test alert couldn't be sent.", res.success ? "ok" : "error");
+    } catch {
+      notify("The test alert couldn't be sent. Check the server logs.", "error");
+    }
+    setTesting(false);
   };
 
   const handleAddTechBadge = () => {
     if (!techBadgeInput.trim()) return;
-    setFormData((prev) => ({
-      ...prev,
-      techBadges: [...(prev.techBadges || []), techBadgeInput.trim()],
-    }));
+    setFormData((prev) => ({ ...prev, techBadges: [...(prev.techBadges || []), techBadgeInput.trim()] }));
     setTechBadgeInput("");
   };
 
   const handleRemoveTechBadge = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      techBadges: (prev.techBadges || []).filter((_, i) => i !== index),
-    }));
+    setFormData((prev) => ({ ...prev, techBadges: (prev.techBadges || []).filter((_, i) => i !== index) }));
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf9f5] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 p-4 sm:p-8 transition-colors">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Admin Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 rounded-2xl shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-bold">
-              <Shield className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100 font-heading">Protected Admin CMS Dashboard</h1>
-              <p className="text-xs text-amber-700 dark:text-amber-400 font-mono">Abhishek Gond Portfolio Management System</p>
-            </div>
-          </div>
+    <div className="adm">
+      <header className="adm-top">
+        <Link href="/" className="adm-logo"><span className="c">©</span> Code by Abhishek<b>Studio</b></Link>
+        <div className="adm-top-actions">
+          <Link href="/" className="adm-pill night"><ArrowUpRight aria-hidden="true" /> View site</Link>
+          <button onClick={() => logoutAdmin()} className="adm-pill night danger"><LogOut aria-hidden="true" /> Log out</button>
+        </div>
+      </header>
 
-          <div className="flex items-center gap-3 font-mono">
-            <Link
-              href="/"
-              className="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold flex items-center gap-1.5"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>View Portfolio</span>
-            </Link>
-
-            <button
-              onClick={() => logoutAdmin()}
-              className="px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-bold flex items-center gap-1.5 transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Logout</span>
-            </button>
-          </div>
+      <div className="adm-wrap">
+        <div className="adm-head">
+          <h1>Studio</h1>
+          <p>Projects you add here appear on the portfolio under “Also built”. Messages from the contact form land in the inbox.</p>
         </div>
 
-        {feedback && (
-          <div className="p-4 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-xs font-mono">
-            {feedback}
+        <div className={`adm-wa${whatsapp.configured ? " on" : ""}`}>
+          <span className="dot" aria-hidden="true" />
+          <div>
+            <b>{whatsapp.configured ? `WhatsApp alerts on · ${whatsapp.to}` : "WhatsApp alerts off"}</b>
+            <span>
+              {whatsapp.mode === "template" && "New messages arrive as a template alert, any time of day."}
+              {whatsapp.mode === "text" && "Plain-text alerts only reach you within 24 hours of messaging the bot. Add WHATSAPP_TEMPLATE for alerts any time."}
+              {whatsapp.mode === "off" && "Add WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_NOTIFY_TO to get every new message on WhatsApp."}
+            </span>
           </div>
-        )}
+          {whatsapp.configured && (
+            <button className="adm-pill" onClick={handleTestWhatsApp} disabled={testing}>{testing ? "Sending…" : "Send test alert"}</button>
+          )}
+        </div>
 
-        {/* Tab Buttons */}
-        <div className="flex gap-3 border-b border-stone-200 dark:border-stone-800 pb-2 font-mono">
-          <button
-            onClick={() => setActiveTab("projects")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === "projects"
-                ? "bg-amber-500 text-stone-950 shadow-sm"
-                : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
-            }`}
-          >
-            Project Manager ({projects.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("contacts")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === "contacts"
-                ? "bg-amber-500 text-stone-950 shadow-sm"
-                : "text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
-            }`}
-          >
-            Contact Submissions Inbox ({contacts.length})
-          </button>
+        <div className="adm-stats">
+          <div className="adm-stat"><span className="fig">{projects.length}</span><div><p className="lbl">Projects in the CMS</p><p className="src">Create, edit or remove below</p></div></div>
+          <div className="adm-stat dark"><span className="fig">{contacts.length}</span><div><p className="lbl">Messages received</p><p className="src">From the contact form</p></div></div>
+          <div className="adm-stat blue"><span className="fig">{unread}</span><div><p className="lbl">Unread messages</p><p className="src">Newest first in the inbox</p></div></div>
+          <div className="adm-stat"><span className="fig" style={{ fontSize: "clamp(26px,2.6vw,38px)" }}>{latest}</span><div><p className="lbl">Latest message</p><p className="src">Local date</p></div></div>
+        </div>
+
+        <div className="adm-tabs" role="tablist" aria-label="Studio sections">
+          <button role="tab" aria-selected={activeTab === "projects"} onClick={() => setActiveTab("projects")}>Projects<span>{projects.length}</span></button>
+          <button role="tab" aria-selected={activeTab === "contacts"} onClick={() => setActiveTab("contacts")}>Inbox<span>{contacts.length}</span></button>
         </div>
 
         {activeTab === "projects" ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Left Column: Project Form (5 Cols) */}
-            <div className="lg:col-span-5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 mb-4 flex items-center gap-2 font-heading">
-                <Plus className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                <span>{isEditing ? "Edit Existing Project" : "Create New Project"}</span>
-              </h2>
+          <div className="adm-grid">
+            <div className="adm-card adm-form-card" ref={formRef}>
+              <div className="adm-card-head">
+                <h2>{isEditing ? `Edit ${formData.title || "project"}` : "New project"}</h2>
+                <span className={`adm-badge${isEditing ? " edit" : ""}`}>{isEditing ? "Editing" : "Draft"}</span>
+              </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4 text-xs font-mono">
-                <div>
-                  <label className="text-stone-500 dark:text-stone-400 block mb-1">Project Title</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.title || ""}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full p-2.5 rounded-lg bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-stone-500 dark:text-stone-400 block mb-1">Subtitle / Short Tagline</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.subtitle || ""}
-                    onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                    className="w-full p-2.5 rounded-lg bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-stone-500 dark:text-stone-400 block mb-1">Category</label>
-                  <select
-                    value={formData.category || "Full-Stack Web"}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full p-2.5 rounded-lg bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-amber-500"
-                  >
-                    <option value="AI & Full-Stack">AI & Full-Stack</option>
-                    <option value="SaaS & Web3/SaaS">SaaS & Web3/SaaS</option>
-                    <option value="SaaS & Mobile Web">SaaS & Mobile Web</option>
-                    <option value="Full-Stack Web">Full-Stack Web</option>
+              <form onSubmit={handleSubmit}>
+                <div className="adm-field"><span className="q">01</span><div>
+                  <label htmlFor="pf-title">Project title</label>
+                  <input id="pf-title" type="text" required placeholder="GridSense" value={formData.title || ""} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
+                </div></div>
+                <div className="adm-field"><span className="q">02</span><div>
+                  <label htmlFor="pf-sub">Subtitle</label>
+                  <input id="pf-sub" type="text" required placeholder="AI IoT telemetry gateway" value={formData.subtitle || ""} onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })} />
+                </div></div>
+                <div className="adm-field"><span className="q">03</span><div>
+                  <label htmlFor="pf-cat">Category</label>
+                  <select id="pf-cat" value={formData.category || "Full-Stack Web"} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
+                    {categories.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
-                </div>
-
-                <div>
-                  <label className="text-stone-500 dark:text-stone-400 block mb-1">Description</label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={formData.description || ""}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full p-2.5 rounded-lg bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-stone-500 dark:text-stone-400 block mb-1">Live Link URL</label>
-                  <input
-                    type="url"
-                    required
-                    value={formData.liveLink || ""}
-                    onChange={(e) => setFormData({ ...formData, liveLink: e.target.value })}
-                    className="w-full p-2.5 rounded-lg bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                {/* Tech Badges */}
-                <div>
-                  <label className="text-stone-500 dark:text-stone-400 block mb-1">Tech Badges</label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      placeholder="Add badge (e.g. Next.js)..."
-                      value={techBadgeInput}
-                      onChange={(e) => setTechBadgeInput(e.target.value)}
-                      className="flex-1 p-2 rounded-lg bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddTechBadge}
-                      className="px-3 py-1 bg-stone-200 dark:bg-stone-800 text-amber-700 dark:text-amber-400 rounded-lg hover:bg-stone-300 dark:hover:bg-stone-700 font-bold"
-                    >
-                      + Add
-                    </button>
+                </div></div>
+                <div className="adm-field"><span className="q">04</span><div>
+                  <label htmlFor="pf-desc">Description</label>
+                  <textarea id="pf-desc" rows={3} required placeholder="What it does and how it's built" value={formData.description || ""} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                </div></div>
+                <div className="adm-field"><span className="q">05</span><div>
+                  <label htmlFor="pf-live">Live link</label>
+                  <input id="pf-live" type="url" required placeholder="https://project.vercel.app" value={formData.liveLink || ""} onChange={(e) => setFormData({ ...formData, liveLink: e.target.value })} />
+                </div></div>
+                <div className="adm-field"><span className="q">06</span><div>
+                  <label htmlFor="pf-tag">Tech tags</label>
+                  <div className="adm-tag-input">
+                    <input id="pf-tag" type="text" placeholder="Next.js" value={techBadgeInput} onChange={(e) => setTechBadgeInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddTechBadge(); } }} />
+                    <button type="button" className="adm-pill" onClick={handleAddTechBadge}><Plus aria-hidden="true" /> Add</button>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {formData.techBadges?.map((b, i) => (
-                      <span key={i} className="px-2 py-0.5 rounded bg-[#fbf9f5] dark:bg-stone-950 text-amber-700 dark:text-amber-400 border border-stone-200 dark:border-stone-800 text-[10px] flex items-center gap-1">
-                        {b}
-                        <button type="button" onClick={() => handleRemoveTechBadge(i)} className="text-rose-500 font-bold ml-1">✕</button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                  {formData.techBadges && formData.techBadges.length > 0 ? (
+                    <div className="adm-tags">
+                      {formData.techBadges.map((b, i) => (
+                        <span key={`${b}-${i}`} className="adm-tag">{b}
+                          <button type="button" onClick={() => handleRemoveTechBadge(i)} aria-label={`Remove ${b}`}>×</button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : <p className="hint">Press Enter or Add after each tag.</p>}
+                </div></div>
 
-                <div className="flex items-center gap-3 pt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold transition-all shadow-sm"
-                  >
-                    {loading ? "Saving..." : isEditing ? "Update Project" : "Create Project"}
+                <div className="adm-form-actions">
+                  <button type="submit" disabled={loading} className="adm-pill dark">
+                    {loading ? "Saving…" : isEditing ? "Update project" : "Create project"}
                   </button>
-
-                  {isEditing && (
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="px-4 py-2.5 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 hover:bg-stone-300 dark:hover:bg-stone-700"
-                    >
-                      Cancel
-                    </button>
-                  )}
+                  {isEditing && <button type="button" onClick={resetForm} className="adm-pill">Cancel</button>}
                 </div>
               </form>
             </div>
 
-            {/* Right Column: Existing Projects List (7 Cols) */}
-            <div className="lg:col-span-7 space-y-4">
-              <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 font-heading">Existing CMS Projects</h2>
-
-              {projects.map((p) => (
-                <div
-                  key={p.id}
-                  className="p-5 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-between gap-4 hover:border-amber-500/50 transition-colors shadow-sm"
-                >
-                  <div>
-                    <span className="text-[10px] text-amber-700 dark:text-amber-400 font-mono uppercase font-bold">{p.category}</span>
-                    <h3 className="font-bold text-stone-900 dark:text-stone-100 text-lg font-heading">{p.title}</h3>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 font-mono line-clamp-1">{p.description}</p>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {p.techBadges.map((b, i) => (
-                        <span key={i} className="px-2 py-0.5 rounded bg-[#fbf9f5] dark:bg-stone-950 text-stone-700 dark:text-stone-300 text-[10px] border border-stone-200 dark:border-stone-800 font-mono">
-                          {b}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEdit(p)}
-                      className="p-2 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-amber-700 dark:text-amber-400"
-                      title="Edit Project"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-600 dark:text-rose-400"
-                      title="Delete Project"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div>
+              <div className="adm-list-head"><span>Projects in the CMS</span><span>{projects.length} total</span></div>
+              {projects.length === 0 ? (
+                <div className="adm-empty" style={{ marginTop: 24 }}><h3>No projects yet</h3><p>Fill in the form to add your first one.</p></div>
+              ) : (
+                <ul className="adm-rows">
+                  {projects.map((p) => (
+                    <li key={p.id} className={`adm-row${isEditing && formData.id === p.id ? " editing" : ""}`}>
+                      <div>
+                        <span className="cat">{p.category}</span>
+                        <h3>{p.title}</h3>
+                        <p className="desc">{p.description}</p>
+                        {p.techBadges.length > 0 && <div className="adm-tags">{p.techBadges.map((b, i) => <span key={`${b}-${i}`} className="adm-tag static">{b}</span>)}</div>}
+                      </div>
+                      <div className="adm-row-actions">
+                        {confirmId === p.id ? (
+                          <div className="adm-confirm">
+                            Delete?
+                            <button className="adm-pill danger" onClick={() => handleDelete(p.id)} disabled={loading}>Yes, delete</button>
+                            <button className="adm-pill" onClick={() => setConfirmId(null)}>Cancel</button>
+                          </div>
+                        ) : (
+                          <>
+                            {p.liveLink && <a className="adm-icon-btn" href={p.liveLink} target="_blank" rel="noopener" title="Open live link" aria-label={`Open ${p.title}`}><ArrowUpRight /></a>}
+                            <button className="adm-icon-btn" onClick={() => handleEdit(p)} title="Edit project" aria-label={`Edit ${p.title}`}><Edit3 /></button>
+                            <button className="adm-icon-btn danger" onClick={() => setConfirmId(p.id)} title="Delete project" aria-label={`Delete ${p.title}`}><Trash2 /></button>
+                          </>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         ) : (
-          /* Contacts Inbox Tab */
-          <div className="space-y-4 font-mono">
-            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 font-heading">Received Contact Inquiries</h2>
-
+          <div>
+            <div className="adm-list-head"><span>Messages from the contact form</span><span>{unread} unread</span></div>
             {contacts.length === 0 ? (
-              <div className="p-8 text-center bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl text-stone-500 text-xs">
-                No contact form submissions recorded yet.
+              <div className="adm-empty" style={{ marginTop: 24 }}>
+                <h3>No messages yet</h3>
+                <p>When someone uses “Get in touch” on the portfolio, their message appears here.</p>
               </div>
             ) : (
               contacts.map((c, i) => (
-                <div key={i} className="p-6 rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-amber-700 dark:text-amber-400 font-bold">{c.name} ({c.email})</span>
-                    <span className="text-stone-500">{new Date(c.createdAt).toLocaleString()}</span>
+                <article key={c._id ? String(c._id) : i} className="adm-mail">
+                  <div className="who">
+                    <b>{c.name}</b>
+                    <a href={`mailto:${c.email}`}>{c.email}</a>
+                    <time>{formatDate(c.createdAt)}</time>
                   </div>
-                  <h4 className="font-bold text-stone-900 dark:text-stone-200 text-sm font-heading">{c.subject}</h4>
-                  <p className="text-xs text-stone-700 dark:text-stone-300 bg-[#fbf9f5] dark:bg-stone-950 p-3 rounded-xl border border-stone-200 dark:border-stone-800">{c.message}</p>
-                </div>
+                  <div>
+                    <h3>{c.subject}</h3>
+                    <p>{c.message}</p>
+                    <span className={`adm-status${!c.status || c.status === "unread" ? " unread" : ""}`}>{c.status || "unread"}</span>
+                  </div>
+                  <div><a className="adm-pill" href={`mailto:${c.email}?subject=${encodeURIComponent("Re: " + (c.subject || "your message"))}`}>Reply</a></div>
+                </article>
               ))
             )}
           </div>
         )}
+      </div>
 
+      <div className={`adm-toast${toast ? " show" : ""}${toast?.kind === "error" ? " error" : ""}`} role="status" aria-live="polite">
+        <i />{toast?.text}
       </div>
     </div>
   );
