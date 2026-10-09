@@ -1,6 +1,7 @@
 import { getAdminSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getProjects, getAdminContacts } from "@/lib/actions";
+import { whatsappStatus } from "@/lib/whatsapp";
 import AdminDashboard from "@/components/AdminDashboard";
 
 export const dynamic = "force-dynamic";
@@ -16,5 +17,5 @@ export default async function AdminPage() {
   // Mongo documents carry ObjectIds and Dates; client components need plain JSON.
   const contacts = JSON.parse(JSON.stringify(await getAdminContacts()));
 
-  return <AdminDashboard initialProjects={projects} contacts={contacts} />;
+  return <AdminDashboard initialProjects={projects} contacts={contacts} whatsapp={whatsappStatus()} />;
 }

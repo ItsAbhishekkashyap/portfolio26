@@ -28,7 +28,6 @@ export const metadata: Metadata = {
     title: "Abhishek Gond | AI & GenAI Engineer, Full-Stack Developer",
     description: "RAG systems, tool-calling agents and real-time apps. Open to 2027 SDE and AI engineering roles.",
   },
-  icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
 };
 
 export const viewport: Viewport = {

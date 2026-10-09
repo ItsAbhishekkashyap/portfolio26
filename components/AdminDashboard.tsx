@@ -4,11 +4,12 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Edit3, LogOut, Trash2, Plus } from "lucide-react";
 import { ProjectData } from "@/lib/seed-data";
-import { createProjectAction, updateProjectAction, deleteProjectAction, logoutAdmin } from "@/lib/actions";
+import { createProjectAction, updateProjectAction, deleteProjectAction, logoutAdmin, sendTestWhatsAppAction } from "@/lib/actions";
 
 interface AdminDashboardProps {
   initialProjects: ProjectData[];
   contacts: any[];
+  whatsapp: { configured: boolean; mode: "template" | "text" | "off"; to: string };
 }
 
 const CATEGORIES = ["AI & Full-Stack", "SaaS & Web3/SaaS", "SaaS & Mobile Web", "Full-Stack Web"];
@@ -34,7 +35,8 @@ const formatDate = (d: any) => {
   return date.toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
 };
 
-export default function AdminDashboard({ initialProjects, contacts }: AdminDashboardProps) {
+export default function AdminDashboard({ initialProjects, contacts, whatsapp }: AdminDashboardProps) {
+  const [testing, setTesting] = useState(false);
   const [projects, setProjects] = useState<ProjectData[]>(initialProjects);
   const [activeTab, setActiveTab] = useState<"projects" | "contacts">("projects");
   const [isEditing, setIsEditing] = useState(false);
@@ -113,6 +115,17 @@ export default function AdminDashboard({ initialProjects, contacts }: AdminDashb
     }
   };
 
+  const handleTestWhatsApp = async () => {
+    setTesting(true);
+    try {
+      const res = await sendTestWhatsAppAction();
+      notify(res.success ? res.message! : res.error || "The test alert couldn't be sent.", res.success ? "ok" : "error");
+    } catch {
+      notify("The test alert couldn't be sent. Check the server logs.", "error");
+    }
+    setTesting(false);
+  };
+
   const handleAddTechBadge = () => {
     if (!techBadgeInput.trim()) return;
     setFormData((prev) => ({ ...prev, techBadges: [...(prev.techBadges || []), techBadgeInput.trim()] }));
@@ -137,6 +150,21 @@ export default function AdminDashboard({ initialProjects, contacts }: AdminDashb
         <div className="adm-head">
           <h1>Studio</h1>
           <p>Projects you add here appear on the portfolio under “Also built”. Messages from the contact form land in the inbox.</p>
+        </div>
+
+        <div className={`adm-wa${whatsapp.configured ? " on" : ""}`}>
+          <span className="dot" aria-hidden="true" />
+          <div>
+            <b>{whatsapp.configured ? `WhatsApp alerts on · ${whatsapp.to}` : "WhatsApp alerts off"}</b>
+            <span>
+              {whatsapp.mode === "template" && "New messages arrive as a template alert, any time of day."}
+              {whatsapp.mode === "text" && "Plain-text alerts only reach you within 24 hours of messaging the bot. Add WHATSAPP_TEMPLATE for alerts any time."}
+              {whatsapp.mode === "off" && "Add WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_NOTIFY_TO to get every new message on WhatsApp."}
+            </span>
+          </div>
+          {whatsapp.configured && (
+            <button className="adm-pill" onClick={handleTestWhatsApp} disabled={testing}>{testing ? "Sending…" : "Send test alert"}</button>
+          )}
         </div>
 
         <div className="adm-stats">

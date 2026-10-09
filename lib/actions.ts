@@ -4,14 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { connectToDatabase } from "@/lib/mongodb";
 import Project from "@/models/Project";
-import Contact from "@/models/Contact";
 import { INITIAL_PROJECTS, ProjectData } from "@/lib/seed-data";
 import { signToken, setAdminCookie, clearAdminCookie, getAdminSession } from "@/lib/auth";
+import { saveContact, listContacts } from "@/lib/contacts-store";
+import { notifyNewContact, sendText, ownerNumber, whatsappStatus } from "@/lib/whatsapp";
 import { z } from "zod";
 
 // Shared memory store fallback when MongoDB is not connected
 let memoryProjects: ProjectData[] = [...INITIAL_PROJECTS];
-const memoryContacts: any[] = [];
 
 // Zod Validation Schemas
 const contactSchema = z.object({
@@ -52,12 +52,11 @@ export async function submitContactForm(prevState: any, formData: FormData) {
 
     const validated = contactSchema.parse(rawData);
 
-    const db = await connectToDatabase();
-    if (db) {
-      await Contact.create(validated);
-    } else {
-      memoryContacts.push({ ...validated, createdAt: new Date() });
-    }
+    // Saved first so it always reaches the admin inbox; the WhatsApp alert is best-effort.
+    const saved = await saveContact(validated);
+    const alert = await notifyNewContact(saved);
+    if (!alert.ok && whatsappStatus().configured) console.error("[whatsapp] alert failed:", alert.error);
+    revalidatePath("/admin");
 
     return { success: true, message: "Message sent successfully! Abhishek will get back to you shortly." };
   } catch (error: any) {
@@ -203,15 +202,22 @@ export async function deleteProjectAction(id: string) {
 export async function getAdminContacts() {
   const session = await getAdminSession();
   if (!session) return [];
+  return listContacts();
+}
 
-  try {
-    const db = await connectToDatabase();
-    if (db) {
-      return await Contact.find({}).sort({ createdAt: -1 }).lean();
-    }
-  } catch (err) {
-    console.error("Error fetching contacts from DB:", err);
+// Sends a sample alert so the owner can confirm WhatsApp is wired up (Admin Protected)
+export async function sendTestWhatsAppAction() {
+  const session = await getAdminSession();
+  if (!session) throw new Error("Unauthorized access. Admin login required.");
+
+  const status = whatsappStatus();
+  if (!status.configured) {
+    return { success: false, error: "WhatsApp isn't set up yet. Add WHATSAPP_TOKEN, WHATSAPP_PHONE_NUMBER_ID and WHATSAPP_NOTIFY_TO." };
   }
-
-  return memoryContacts;
+  const res = status.mode === "template"
+    ? await notifyNewContact({ name: "Test Sender", email: "test@example.com", subject: "Test alert from Studio", message: "If you can read this, portfolio alerts are working.", createdAt: new Date() })
+    : await sendText(ownerNumber(), "Test alert from your portfolio Studio. If you can read this, WhatsApp is connected.");
+  return res.ok
+    ? { success: true, message: `Test alert sent to ${status.to}.` }
+    : { success: false, error: res.error };
 }

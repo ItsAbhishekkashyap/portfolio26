@@ -153,3 +153,11 @@
 @media (prefers-reduced-motion:reduce){
   .adm *,.adm *::before,.adm *::after{transition-duration:.01ms!important;animation:none!important}
 }
+
+/* WhatsApp alert status */
+.adm-wa{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin:-12px 0 clamp(28px,3vw,40px)}
+.adm-wa .dot{width:10px;height:10px;border-radius:50%;background:var(--mute);flex:none}
+.adm-wa.on .dot{background:#25d366;box-shadow:0 0 0 5px rgba(37,211,102,.18)}
+.adm-wa > div{flex:1;min-width:220px;display:flex;flex-direction:column;gap:2px}
+.adm-wa b{font-weight:500}
+.adm-wa span{font-size:13.5px;color:var(--ink-2)}
