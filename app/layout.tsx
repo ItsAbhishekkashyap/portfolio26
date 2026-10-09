@@ -1,93 +1,55 @@
-import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter, JetBrains_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["400", "500", "600", "700"],
-});
+const SITE = "https://abhishekgond.vercel.app";
+const DESCRIPTION =
+  "Abhishek Gond builds AI that answers with evidence and full-stack products that stay fast in production: RAG systems, tool-calling agents and real-time apps. Final-year B.Tech ECE at IET Lucknow, open to 2027 SDE and AI engineering roles.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://abhishekgond.vercel.app"),
-  title: "Abhishek Gond | Full-Stack Software Engineer & High Agency Fellow",
-  description:
-    "Personal Portfolio of Abhishek Gond — Full-Stack Software Engineer & High Agency Fellow at Panscience Innovations. B.Tech ECE candidate at IET Lucknow (7.85 CGPA). Solved 400+ DSA problems.",
+  metadataBase: new URL(SITE),
+  title: "Abhishek Gond | Software Engineer, AI & GenAI Engineer",
+  description: DESCRIPTION,
   keywords: [
-    "Abhishek Gond",
-    "Abhishek Gond Portfolio",
-    "Full Stack Software Engineer",
-    "Panscience Innovations",
-    "IET Lucknow",
-    "Next.js App Router",
-    "TypeScript",
-    "AyuNidan",
-    "High Agency Fellow",
+    "Abhishek Gond", "Abhishek Gond portfolio", "AI engineer", "GenAI engineer", "Full-stack developer",
+    "RAG", "LangGraph", "Next.js", "IET Lucknow", "Software engineer 2027",
   ],
-  authors: [{ name: "Abhishek Gond", url: "https://abhishekgond.vercel.app/" }],
+  authors: [{ name: "Abhishek Gond", url: SITE }],
   creator: "Abhishek Gond",
   openGraph: {
-    title: "Abhishek Gond | Full-Stack Software Engineer",
-    description: "High Agency Fellow & Software Engineering Candidate at IET Lucknow.",
-    url: "https://abhishekgond.vercel.app/",
-    siteName: "Abhishek Gond Portfolio",
-    images: [
-      {
-        url: "/abhishek.jpg",
-        width: 800,
-        height: 800,
-        alt: "Abhishek Gond Profile Photo",
-      },
-    ],
+    title: "Abhishek Gond | AI & GenAI Engineer, Full-Stack Developer",
+    description: "RAG systems, tool-calling agents and real-time apps. Open to 2027 SDE and AI engineering roles.",
+    url: SITE,
+    siteName: "Abhishek Gond",
     locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Abhishek Gond | Full-Stack Software Engineer",
-    description: "High Agency Fellow & Software Engineering Candidate at IET Lucknow.",
-    images: ["/abhishek.jpg"],
+    title: "Abhishek Gond | AI & GenAI Engineer, Full-Stack Developer",
+    description: "RAG systems, tool-calling agents and real-time apps. Open to 2027 SDE and AI engineering roles.",
   },
-  icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
-  },
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg", apple: "/icon.svg" },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#1b1c20",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
     name: "Abhishek Gond",
-    url: "https://abhishekgond.vercel.app/",
-    image: "https://abhishekgond.vercel.app/abhishek.jpg",
-    jobTitle: "Full-Stack Software Engineer & High Agency Fellow",
-    worksFor: {
-      "@type": "Organization",
-      name: "Panscience Innovations",
-    },
-    alumniOf: {
-      "@type": "EducationalOrganization",
-      name: "Institute of Engineering and Technology Lucknow",
-    },
+    url: SITE,
+    image: `${SITE}/abhishek.jpg`,
+    jobTitle: "Software Engineer, AI & GenAI Engineer",
+    email: "mailto:abhi47025@gmail.com",
+    address: { "@type": "PostalAddress", addressLocality: "Lucknow", addressCountry: "IN" },
+    alumniOf: { "@type": "EducationalOrganization", name: "Institute of Engineering and Technology Lucknow" },
+    knowsAbout: ["Retrieval-augmented generation", "LangGraph", "Next.js", "Node.js", "FastAPI", "PostgreSQL"],
     sameAs: [
       "https://www.linkedin.com/in/abhishek-gond-054884256",
       "https://github.com/ItsAbhishekkashyap",
@@ -96,22 +58,17 @@ export default function RootLayout({
   };
 
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${plusJakartaSans.variable} ${inter.variable} ${jetbrainsMono.variable}`}
-    >
+    // "dark" keeps the admin's dark: variants working; the public page sets its own palette.
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500&display=swap" />
+        <link rel="preload" as="image" href="/abhishek.jpg" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </head>
-      <body className="bg-[#fbf9f5] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 antialiased min-h-screen transition-colors duration-300">
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-          {children}
-        </ThemeProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

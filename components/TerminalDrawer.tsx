@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -77,22 +77,22 @@ export default function TerminalDrawer({ isOpen, onClose, onOpenResume, onOpenSc
               <p className="text-teal-400 font-bold">Available Interactive Commands:</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300">
                 <button onClick={() => executeCommand("projects")} className="text-left p-1.5 rounded bg-slate-900 border border-slate-800 hover:border-teal-500 text-teal-300">
-                  ⚡ <strong>projects</strong> — Jump to projects
+                  âš¡ <strong>projects</strong> â€” Jump to projects
                 </button>
                 <button onClick={() => executeCommand("skills")} className="text-left p-1.5 rounded bg-slate-900 border border-slate-800 hover:border-teal-500 text-teal-300">
-                  ⚡ <strong>skills</strong> — View skill matrix
+                  âš¡ <strong>skills</strong> â€” View skill matrix
                 </button>
                 <button onClick={() => executeCommand("resume")} className="text-left p-1.5 rounded bg-slate-900 border border-slate-800 hover:border-teal-500 text-teal-300">
-                  ⚡ <strong>resume</strong> — Open resume modal
+                  âš¡ <strong>resume</strong> â€” Open resume modal
                 </button>
                 <button onClick={() => executeCommand("contact")} className="text-left p-1.5 rounded bg-slate-900 border border-slate-800 hover:border-teal-500 text-teal-300">
-                  ⚡ <strong>contact</strong> — Schedule 15-min call
+                  âš¡ <strong>contact</strong> â€” Schedule 15-min call
                 </button>
                 <button onClick={() => executeCommand("theme")} className="text-left p-1.5 rounded bg-slate-900 border border-slate-800 hover:border-teal-500 text-teal-300">
-                  ⚡ <strong>theme</strong> — Toggle dark/light mode
+                  âš¡ <strong>theme</strong> â€” Toggle dark/light mode
                 </button>
                 <button onClick={() => executeCommand("whoami")} className="text-left p-1.5 rounded bg-slate-900 border border-slate-800 hover:border-teal-500 text-teal-300">
-                  ⚡ <strong>whoami</strong> — View recruiter session
+                  âš¡ <strong>whoami</strong> â€” View recruiter session
                 </button>
               </div>
             </div>

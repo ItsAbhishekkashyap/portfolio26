@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { motion } from "framer-motion";
@@ -209,7 +209,7 @@ export default function BentoGrid() {
               <div className="space-y-4 mb-6">
                 <div className="p-4 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800">
                   <p className="text-xs font-mono text-amber-700 dark:text-amber-400 font-bold mb-1">Tenure</p>
-                  <p className="text-sm font-semibold font-mono">Sep 2025 – Aug 2026</p>
+                  <p className="text-sm font-semibold font-mono">Sep 2025 â€“ Aug 2026</p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800">

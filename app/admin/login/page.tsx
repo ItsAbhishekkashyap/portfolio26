@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { loginAdmin } from "@/lib/actions";
-import { Shield, User, ArrowLeft, KeyRound } from "lucide-react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { loginAdmin } from "@/lib/actions";
 
 export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
@@ -17,77 +17,54 @@ export default function AdminLoginPage() {
     const formData = new FormData(e.currentTarget);
     const res = await loginAdmin(null, formData);
 
+    // On success the action redirects to /admin; we only get here on failure.
     if (res && !res.success) {
       setLoading(false);
-      setError(res.error || "Login failed.");
+      setError(res.error || "Sign-in failed. Check your username and password.");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf9f5] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 flex items-center justify-center p-4 relative transition-colors">
-      <div className="relative w-full max-w-md bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-8 shadow-xl z-10">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-mono text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Return to Live Portfolio</span>
-        </Link>
+    <div className="adm adm-login">
+      <aside className="adm-login-side">
+        <Link href="/" className="adm-logo"><span className="c">©</span> Code by Abhishek<b>Studio</b></Link>
+        <div>
+          <div className="adm-login-ava" aria-hidden="true" />
+          <h1>Welcome<br />back.</h1>
+          <p>Manage the projects on your portfolio and read messages from recruiters and collaborators.</p>
+        </div>
+      </aside>
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-bold">
-            <Shield className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold font-heading">Admin Portal Login</h1>
-            <p className="text-xs text-stone-500 dark:text-stone-400 font-mono">Abhishek Gond Protected CMS</p>
-          </div>
+      <main className="adm-login-main">
+        <Link href="/" className="adm-back"><ArrowLeft aria-hidden="true" /> Back to the portfolio</Link>
+        <div>
+          <h2>Sign in to Studio</h2>
+          <p className="lede">Only the site owner can sign in here.</p>
         </div>
 
-        {error && (
-          <div className="p-3.5 mb-5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-mono">
-            {error}
-          </div>
-        )}
+        {error && <div className="adm-alert" role="alert">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-4 font-mono text-xs">
-          <div>
-            <label className="block text-stone-500 dark:text-stone-400 mb-1">Username</label>
-            <div className="relative">
-              <User className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                name="username"
-                required
-                placeholder="admin"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-amber-500 font-medium"
-              />
+        <form onSubmit={handleSubmit}>
+          <div className="adm-field">
+            <span className="q">01</span>
+            <div>
+              <label htmlFor="adm-user">Username</label>
+              <input id="adm-user" type="text" name="username" required autoComplete="username" placeholder="admin" />
             </div>
           </div>
-
-          <div>
-            <label className="block text-stone-500 dark:text-stone-400 mb-1">Password</label>
-            <div className="relative">
-              <KeyRound className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="password"
-                name="password"
-                required
-                placeholder="••••••••"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-[#fbf9f5] dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:border-amber-500 font-medium"
-              />
+          <div className="adm-field">
+            <span className="q">02</span>
+            <div>
+              <label htmlFor="adm-pass">Password</label>
+              <input id="adm-pass" type="password" name="password" required autoComplete="current-password" placeholder="••••••••" />
             </div>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs shadow-sm transition-opacity disabled:opacity-50 mt-2 font-mono"
-          >
-            {loading ? "Authenticating Session..." : "Authorize Admin Access"}
-          </button>
+          <div className="adm-login-foot">
+            <p className="lede" style={{ margin: 0, color: "var(--mute)", fontSize: 14 }}>Your session stays signed in for 7 days.</p>
+            <button type="submit" className="adm-circle" disabled={loading}>{loading ? "Signing in…" : "Sign in"}</button>
+          </div>
         </form>
-      </div>
+      </main>
     </div>
   );
 }

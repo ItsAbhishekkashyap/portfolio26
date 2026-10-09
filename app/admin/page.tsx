@@ -13,7 +13,8 @@ export default async function AdminPage() {
   }
 
   const projects = await getProjects();
-  const contacts = await getAdminContacts();
+  // Mongo documents carry ObjectIds and Dates; client components need plain JSON.
+  const contacts = JSON.parse(JSON.stringify(await getAdminContacts()));
 
   return <AdminDashboard initialProjects={projects} contacts={contacts} />;
 }

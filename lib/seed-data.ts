@@ -1,4 +1,4 @@
-export interface ProjectData {
+﻿export interface ProjectData {
   _id?: string;
   id: string;
   title: string;
@@ -6,7 +6,7 @@ export interface ProjectData {
   description: string;
   techBadges: string[];
   liveLink: string;
-  githubLink?: string;
+  githubLink?: string; imageUrl?: string;
   featured: boolean;
   category: string;
   architecture: {
@@ -51,11 +51,11 @@ export const PERSONA = {
     leetcode: "https://leetcode.com/u/Its_Abhishek_Kashyap/",
   },
   leetcodeStats: {
-    solved: "400+",
-    rating: 1404,
+    solved: "450+",
+    rating: 1440,
     percentile: "Top 84.15%",
-    streak: "60 Days",
-    badge: "50 Days Badge 2026",
+    streak: "10 Days Badge",
+    badge: "100 Days Badge 2026",
     link: "https://leetcode.com/u/Its_Abhishek_Kashyap/",
   },
   athletics: {
@@ -69,7 +69,7 @@ export const PERSONA = {
       organization: "Training & Placement Cell (TPC), IET Lucknow",
       role: "Core Member",
       period: "Sep 2025 – Aug 2026",
-      desc: "Digitized placement data, engineered internal portals, and bridged recruiter communications.",
+      desc: "Streamlined campus recruitment logistics, bridging communication between visiting HR teams and candidates while digitizing placement data.",
     },
   ],
 };
@@ -80,94 +80,115 @@ export const INITIAL_PROJECTS: ProjectData[] = [
     title: "AyuNidan",
     subtitle: "AI Narrative Engine & Telemetry Extraction",
     description:
-      "AI platform converting clinical narratives to structured JSON telemetry via zero-shot extraction & Zod validation. Engineered RAG-based clinical index pipeline & 3-tier deterministic risk-scoring engine.",
-    techBadges: ["Next.js", "TypeScript", "AI", "Zod", "RAG", "Tailwind CSS"],
+      "Node.js backend utilizing temperature-locked zero-shot LLM extraction and Pinecone RAG to ingest raw clinical PDFs into strictly typed JSON for triage.",
+    techBadges: ["Next.js", "Node.js", "MongoDB", "Pinecone", "LLM"],
     liveLink: "https://ayunidan.vercel.app/",
     githubLink: "https://github.com/ItsAbhishekkashyap",
-    featured: true,
+    featured: true, imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
     category: "AI & Full-Stack",
     architecture: {
-      auth: "JWT-based multi-tenant authorization with strict data isolation",
-      database: "Vector Database + MongoDB for telemetry JSON persistence",
-      caching: "Redis LRU cache for indexed clinical embeddings",
-      apis: "Zero-shot LLM inference pipeline with deterministic Zod schema validation",
+      auth: "Stateless JWTs",
+      database: "MongoDB with compound indexes",
+      caching: "Vector embeddings via Pinecone",
+      apis: "Zero-shot LLM extraction pipeline",
       systemHighlights: [
-        "Zero-shot clinical narrative extraction into strict JSON telemetry",
-        "RAG-based clinical indexing engine for fast semantic retrieval",
-        "3-tier deterministic patient risk-scoring algorithm",
-        "Multi-tenant tenant isolation for hospital and clinic workflows",
+        "3-tier constrained risk engine",
+        "Multi-tenant isolation via MongoDB compound indexes",
+        "Temperature-locked zero-shot LLM extraction",
+        "RAG ingestion of clinical PDFs into typed JSON"
+      ],
+    },
+  },
+  {
+    id: "algorithmic-rag",
+    title: "Algorithmic RAG Engine",
+    subtitle: "Framework-Free Microservice",
+    description:
+      "Engineered a framework-free RAG microservice, achieving < 500ms cold starts with O(N) sliding-window chunking and pure NumPy Cosine Similarity.",
+    techBadges: ["Python", "NumPy", "FastAPI", "Streamlit", "Docker"],
+    liveLink: "https://github.com/ItsAbhishekkashyap",
+    githubLink: "https://github.com/ItsAbhishekkashyap",
+    featured: true, imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+    category: "AI & Microservices",
+    architecture: {
+      auth: "None",
+      database: "In-memory NumPy arrays",
+      caching: "None",
+      apis: "FastAPI microservice",
+      systemHighlights: [
+        "Framework-free RAG microservice",
+        "< 500ms cold starts",
+        "O(N) sliding-window chunking",
+        "~120MB memory footprint without commercial vector DBs"
+      ],
+    },
+  },
+  {
+    id: "gridsense",
+    title: "GridSense",
+    subtitle: "AI IoT Telemetry Gateway",
+    description: "Architected an AI telemetry gateway achieving < 400ms Next.js hydration. Engineered a LangGraph Multi-Agent Copilot with pgvector RAG.",
+    techBadges: ["Next.js", "LangGraph", "pgvector", "Node.js", "PostgreSQL"],
+    liveLink: "https://github.com/ItsAbhishekkashyap",
+    githubLink: "https://github.com/ItsAbhishekkashyap",
+    featured: true, imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+    category: "AI & IoT",
+    architecture: {
+      auth: "Standard Auth",
+      database: "PostgreSQL & pgvector",
+      caching: "In-memory Socket.IO streaming",
+      apis: "LangGraph Multi-Agent Coordination",
+      systemHighlights: [
+        "< 400ms Next.js hydration",
+        "LangGraph Multi-Agent Copilot with pgvector RAG",
+        "Reduced database query volume by 99.5% via Socket.IO streaming"
       ],
     },
   },
   {
     id: "menuluxe",
-    title: "MenuLuxe Digital QR Menu SaaS",
-    subtitle: "Multi-Tenant Restaurant Suite",
-    description:
-      "Architected a multi-tenant SaaS platform featuring Row-Level Security (RLS) and optimized dynamic data fetching using Next.js Server Actions, reducing latency by 40%.",
-    techBadges: ["Next.js", "TypeScript", "Supabase", "Tailwind CSS", "Server Actions"],
+    title: "MenuLuxe",
+    subtitle: "Digital QR Menu SaaS",
+    description: "Architected a multi-tenant SaaS platform with Row-Level Security (RLS); engineered GSAP-animated menus utilizing strict Supabase joins.",
+    techBadges: ["Next.js", "TypeScript", "Supabase", "Tailwind CSS"],
     liveLink: "https://menuluxe.vercel.app/",
     githubLink: "https://github.com/ItsAbhishekkashyap",
-    featured: true,
-    category: "SaaS & Mobile Web",
+    featured: true, imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+    category: "SaaS",
     architecture: {
-      auth: "Supabase Auth with Row-Level Security (RLS) policy enforcement",
-      database: "PostgreSQL multi-tenant schema with JSON menu structures",
-      caching: "Next.js Stale-While-Revalidate & Server Component caching",
-      apis: "Next.js Server Actions for instant optimistic menu ordering",
+      auth: "Supabase Auth & RLS",
+      database: "Supabase PostgreSQL",
+      caching: "Edge Caching",
+      apis: "Supabase Data APIs",
       systemHighlights: [
-        "Dynamic QR menu generation per table/restaurant",
-        "Instant realtime order notification via WebSockets/Supabase Realtime",
-        "Sub-second menu load times optimized for mobile browsers",
+        "Multi-tenant architecture with Row-Level Security",
+        "GSAP-animated menus",
+        "Strict Supabase relational joins"
       ],
     },
   },
   {
-    id: "branqly",
-    title: "Branqly URL Shortener SaaS",
-    subtitle: "Enterprise SaaS & Analytics Engine",
-    description:
-      "Full-stack URL Shortener SaaS with custom domain mapping, DNS CNAME verification, and automated subscription billing via Razorpay integration.",
-    techBadges: ["Next.js", "TypeScript", "MongoDB", "Razorpay", "Node.js"],
-    liveLink: "https://branqly.xyz/",
+    id: "coderag",
+    title: "CodeRAG Vector",
+    subtitle: "Hack Devengers 1.0 (Top 30 / 4.2K+)",
+    description: "Architected a RAG-powered static code analysis engine paired with a Next.js DevSecOps command center leveraging Gemini 1.5 Flash.",
+    techBadges: ["FastAPI", "LangChain", "ChromaDB", "Next.js", "Gemini 1.5 Flash"],
+    liveLink: "https://github.com/ItsAbhishekkashyap",
     githubLink: "https://github.com/ItsAbhishekkashyap",
-    featured: true,
-    category: "SaaS & Web3/SaaS",
+    featured: true, imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+    category: "AI DevSecOps",
     architecture: {
-      auth: "HTTP-Only Secured JWT & NextAuth OAuth integration",
-      database: "MongoDB with indexed link hashing & custom domain mappings",
-      caching: "Edge-cached redirect lookups with sub-10ms response latency",
-      apis: "Razorpay Webhook listener & automated DNS CNAME resolution checker",
+      auth: "None",
+      database: "ChromaDB",
+      caching: "None",
+      apis: "FastAPI Engine",
       systemHighlights: [
-        "Custom domain support with real-time CNAME DNS record verification",
-        "Razorpay subscription lifecycle & tier limits enforcement",
-        "Real-time click telemetry, country distribution, and referrer analytics",
+        "RAG-powered static code analysis",
+        "Leveraged Gemini 1.5 Flash to audit repositories",
+        "Real-time codebase health and OWASP vulnerability surfacing"
       ],
     },
-  },
-  {
-    id: "placement-portal",
-    title: "Official Placement Cell Portal",
-    subtitle: "IET Lucknow Campus Platform",
-    description:
-      "Official placement portal for IET Lucknow, establishing the core frontend architecture currently powering campus drive workflows in production.",
-    techBadges: ["HTML5", "Tailwind CSS", "JavaScript", "Node.js"],
-    liveLink: "https://placementietlucknow.vercel.app/",
-    githubLink: "https://github.com/ItsAbhishekkashyap",
-    featured: true,
-    category: "Full-Stack Web",
-    architecture: {
-      auth: "Role-based access control (Student, TPC Core Member, Recruiter)",
-      database: "MongoDB for digitized student profiles & drive applications",
-      caching: "Static generation with incremental revalidation for drive announcements",
-      apis: "REST APIs for resume processing, company portal routing, & analytics",
-      systemHighlights: [
-        "Digitized placement metrics & automated application verification",
-        "Role-based dashboard for recruiters & core placement officers",
-        "Handled thousands of concurrent student applications seamlessly",
-      ],
-    },
-  },
+  }
 ];
 
 export const EXPERIENCES: ExperienceData[] = [
@@ -177,11 +198,10 @@ export const EXPERIENCES: ExperienceData[] = [
     type: "Fellowship",
     period: "July 2026",
     highlights: [
-      "Co-developed AyuNidan, an AI platform converting clinical narratives to structured JSON telemetry via zero-shot extraction & Zod validation.",
-      "Engineered RAG-based clinical index pipeline & 3-tier deterministic risk-scoring engine, accelerating real-time triage decisions.",
-      "Implemented JWT authentication and strict data isolation for multi-tenant workflows to safeguard healthcare data.",
+      "Architected AyuNidan: Node.js backend utilizing temperature-locked zero-shot LLM extraction and Pinecone RAG to ingest raw clinical PDFs into strictly typed JSON for triage.",
+      "Engineered a 3-tier constrained risk engine, enforcing multi-tenant isolation via MongoDB compound indexes and stateless JWTs to secure workflows."
     ],
-    tags: ["Next.js", "TypeScript", "AI", "RAG", "Zod", "Multi-Tenant JWT"],
+    tags: ["Node.js", "MongoDB", "Pinecone RAG", "LLM", "JWT"],
   },
   {
     company: "Durga Foundation",
@@ -189,9 +209,8 @@ export const EXPERIENCES: ExperienceData[] = [
     type: "Internship",
     period: "Feb 2026 – Apr 2026",
     highlights: [
-      "Migrated NGO portal to Next.js; engineered full-stack 'Youth Corner' platform using Node.js, Express, and MySQL.",
-      "Architected 11-client multi-schema Prisma ORM setup; integrated Redis caching and Razorpay for efficient donation processing.",
-      "Developed CBT exam system with automated proctoring & JWT-secured, OTP-based student enrollment flow.",
+      "Migrated the NGO portal to Next.js and engineered the full-stack 'Youth Corner' platform using Node.js, Express, and MySQL.",
+      "Architected an 11-client multi-schema Prisma ORM setup; integrated Redis caching and Razorpay for efficient donation processing."
     ],
     tags: ["Next.js", "Node.js", "Express", "MySQL", "Prisma ORM", "Redis", "Razorpay"],
   },
@@ -200,68 +219,56 @@ export const EXPERIENCES: ExperienceData[] = [
 export const SKILL_CATEGORIES = [
   {
     id: "languages",
-    name: "Languages",
+    name: "Languages & UI",
     skills: [
-      { name: "TypeScript", level: "Expert", percentage: 95, icon: "Code2" },
-      { name: "JavaScript (ES6+)", level: "Expert", percentage: 95, icon: "FileCode" },
+      { name: "Python", level: "Expert", percentage: 95, icon: "Terminal" },
+      { name: "JavaScript/TypeScript", level: "Expert", percentage: 95, icon: "Code2" },
       { name: "C++", level: "Advanced", percentage: 90, icon: "Cpu" },
-      { name: "Python", level: "Advanced", percentage: 85, icon: "Terminal" },
-      { name: "HTML5 & CSS3", level: "Expert", percentage: 98, icon: "Layout" },
-    ],
-  },
-  {
-    id: "frameworks",
-    name: "Frameworks & Libraries",
-    skills: [
-      { name: "Next.js (App Router)", level: "Expert", percentage: 95, icon: "Layers" },
-      { name: "React.js", level: "Expert", percentage: 95, icon: "Atom" },
-      { name: "Node.js", level: "Expert", percentage: 92, icon: "Server" },
+      { name: "React.js / Next.js", level: "Expert", percentage: 95, icon: "Layers" },
       { name: "Express.js", level: "Expert", percentage: 90, icon: "Workflow" },
-      { name: "Tailwind CSS", level: "Expert", percentage: 98, icon: "Palette" },
-      { name: "Framer Motion", level: "Advanced", percentage: 88, icon: "Sparkles" },
+      { name: "Tailwind CSS", level: "Expert", percentage: 95, icon: "Palette" }
     ],
   },
   {
-    id: "databases",
-    name: "Databases & Caching",
+    id: "ai",
+    name: "AI & LLM",
     skills: [
-      { name: "MongoDB", level: "Expert", percentage: 92, icon: "Database" },
-      { name: "MySQL", level: "Advanced", percentage: 88, icon: "Table" },
-      { name: "Supabase", level: "Advanced", percentage: 85, icon: "Cloud" },
-      { name: "Prisma ORM", level: "Expert", percentage: 90, icon: "Box" },
-      { name: "Redis", level: "Advanced", percentage: 85, icon: "Zap" },
+      { name: "RAG Pipelines", level: "Expert", percentage: 95, icon: "BrainCircuit" },
+      { name: "Prompt / Context Engineering", level: "Expert", percentage: 95, icon: "Sparkles" },
+      { name: "LangChain / LangGraph", level: "Expert", percentage: 90, icon: "Network" },
+      { name: "Embeddings", level: "Expert", percentage: 95, icon: "Database" }
     ],
   },
   {
-    id: "tools",
-    name: "Tools & DevOps",
+    id: "cloud",
+    name: "Cloud & DevOps",
     skills: [
-      { name: "Git & GitHub", level: "Expert", percentage: 95, icon: "GitBranch" },
-      { name: "REST APIs & Webhooks", level: "Expert", percentage: 95, icon: "Globe" },
-      { name: "JWT & Google OAuth", level: "Expert", percentage: 92, icon: "Lock" },
-      { name: "Razorpay Gateway", level: "Advanced", percentage: 88, icon: "CreditCard" },
-      { name: "Zod Schema Validation", level: "Expert", percentage: 95, icon: "CheckCircle2" },
-      { name: "Vercel & Postman", level: "Expert", percentage: 95, icon: "Send" },
+      { name: "REST APIs", level: "Expert", percentage: 95, icon: "Globe" },
+      { name: "Git / CI/CD", level: "Expert", percentage: 90, icon: "GitBranch" },
+      { name: "Docker Containers", level: "Advanced", percentage: 85, icon: "Box" },
+      { name: "FastAPI", level: "Expert", percentage: 90, icon: "Zap" },
+      { name: "Node.js", level: "Expert", percentage: 90, icon: "Server" }
     ],
   },
   {
-    id: "testing",
-    name: "Testing & Quality",
+    id: "aiops",
+    name: "AI Ops & Data",
     skills: [
-      { name: "Unit Testing", level: "Advanced", percentage: 85, icon: "ShieldCheck" },
-      { name: "Integration Testing", level: "Advanced", percentage: 85, icon: "Network" },
-      { name: "E2E Testing", level: "Intermediate", percentage: 80, icon: "CheckSquare" },
+      { name: "Vector DB (pgvector, ChromaDB)", level: "Expert", percentage: 95, icon: "Database" },
+      { name: "Multi-Agent Coordination", level: "Advanced", percentage: 85, icon: "Users" },
+      { name: "PostgreSQL / MySQL / MongoDB", level: "Expert", percentage: 95, icon: "Table" },
+      { name: "Prisma ORM", level: "Expert", percentage: 90, icon: "FileCode" }
     ],
   },
   {
     id: "core-cs",
-    name: "Core Computer Science",
+    name: "Core Subjects",
     skills: [
       { name: "Data Structures & Algorithms", level: "Expert (400+)", percentage: 95, icon: "Binary" },
       { name: "Operating Systems", level: "Advanced", percentage: 88, icon: "HardDrive" },
       { name: "Computer Networks", level: "Advanced", percentage: 88, icon: "Wifi" },
-      { name: "DBMS & SQL", level: "Expert", percentage: 92, icon: "FolderTree" },
-      { name: "AI & Machine Learning", level: "Intermediate", percentage: 82, icon: "Bot" },
+      { name: "DBMS", level: "Expert", percentage: 92, icon: "FolderTree" }
     ],
   },
 ];
+
