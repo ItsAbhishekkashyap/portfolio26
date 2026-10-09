@@ -11,7 +11,7 @@ const env = () => ({
   to: (process.env.WHATSAPP_NOTIFY_TO || "").replace(/\D/g, ""),
   template: process.env.WHATSAPP_TEMPLATE || "",
   lang: process.env.WHATSAPP_TEMPLATE_LANG || "en",
-  version: process.env.WHATSAPP_API_VERSION || "v23.0",
+  version: process.env.WHATSAPP_API_VERSION || "v25.0",
 });
 
 export interface WhatsAppStatus { configured: boolean; mode: "template" | "text" | "off"; to: string }
@@ -69,7 +69,7 @@ export async function notifyNewContact(c: ContactRecord): Promise<SendResult> {
   const e = env();
   if (!e.token || !e.phoneId || !e.to) return { ok: false, error: "WhatsApp alerts are off." };
   if (e.template) {
-    return send({
+    const viaTemplate = await send({
       to: e.to,
       type: "template",
       template: {
@@ -77,12 +77,23 @@ export async function notifyNewContact(c: ContactRecord): Promise<SendResult> {
         language: { code: e.lang },
         components: [{
           type: "body",
-          parameters: [param(c.name, 60), param(c.email, 120), param(c.subject, 120), param(c.message, 700)].map((text) => ({ type: "text", text })),
+          // Order must match the approved template body: {{1}} name, {{2}} email, {{3}} subject, {{4}} when (IST), {{5}} message.
+          parameters: [param(c.name, 60), param(c.email, 120), param(c.subject, 120), param(istDate(c.createdAt), 40), param(c.message, 700)]
+            .map((text) => ({ type: "text", text })),
         }],
       },
     });
+    if (viaTemplate.ok) return viaTemplate;
+    // Template still in review, rejected, or blocked: fall back to plain text (delivered inside the 24-hour window).
+    console.warn("[whatsapp] template send failed, falling back to text:", viaTemplate.error);
+    const viaText = await sendText(e.to, plainAlert(c));
+    return viaText.ok ? viaText : { ok: false, error: `Template: ${viaTemplate.error} Text: ${viaText.error}` };
   }
-  return sendText(e.to, [
+  return sendText(e.to, plainAlert(c));
+}
+
+function plainAlert(c: ContactRecord) {
+  return [
     "*New message from your portfolio*",
     "",
     `*From:* ${c.name} (${c.email})`,
@@ -92,7 +103,7 @@ export async function notifyNewContact(c: ContactRecord): Promise<SendResult> {
     c.message.slice(0, 1500),
     "",
     "Reply *inbox* to see recent messages.",
-  ].join("\n"));
+  ].join("\n");
 }
 
 export function formatInbox(list: ContactRecord[], title: string) {
