@@ -38,6 +38,20 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
   const [askOpen, setAskOpenState] = useState(false);
   const [introReady, setIntroReady] = useState(false);
 
+  // Scroll lock. With Lenis running, it stops/starts Lenis; before Lenis exists (child effects such as the
+  // preloader run first) or with reduced motion, it falls back to overflow on <html>. The fallback must be
+  // cleared once Lenis takes over: phones scroll natively, and a leftover overflow:hidden freezes touch scrolling.
+  const applyLocks = useCallback(() => {
+    const locked = locks.current.size > 0;
+    const lenis = lenisRef.current;
+    if (lenis) {
+      document.documentElement.style.overflow = "";
+      locked ? lenis.stop() : lenis.start();
+    } else {
+      document.documentElement.style.overflow = locked ? "hidden" : "";
+    }
+  }, []);
+
   // Smooth scrolling, driven by the GSAP ticker so ScrollTrigger stays in sync.
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -47,7 +61,7 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
     const raf = (t: number) => lenis.raf(t * 1000);
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
-    if (locks.current.size) lenis.stop();
+    applyLocks(); // hand any lock taken before Lenis existed over to Lenis
     // Trigger positions are measured once, so re-measure after late fonts and images settle the page height.
     // (Not a ResizeObserver: the footer curve changes the height while scrolling.)
     let timer = 0;
@@ -64,14 +78,8 @@ export default function SiteProvider({ children }: { children: React.ReactNode }
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [applyLocks]);
 
-  const applyLocks = useCallback(() => {
-    const locked = locks.current.size > 0;
-    const lenis = lenisRef.current;
-    if (lenis) locked ? lenis.stop() : lenis.start();
-    else document.documentElement.style.overflow = locked ? "hidden" : "";
-  }, []);
   const lock = useCallback((key: string) => { locks.current.add(key); applyLocks(); }, [applyLocks]);
   const unlock = useCallback((key: string) => { locks.current.delete(key); applyLocks(); }, [applyLocks]);
 

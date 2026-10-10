@@ -65,6 +65,17 @@ export default function AskChat() {
 
   useEffect(scrollDown, [msgs, busy, scrollDown]);
 
+  // Tuck the floating launcher away while the footer signature is on screen, so it never covers "Gond";
+  // the footer has its own "Ask the portfolio a question" button.
+  const [tucked, setTucked] = useState(false);
+  useEffect(() => {
+    const sign = document.querySelector(".f-sign");
+    if (!sign || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(([e]) => setTucked(e.isIntersecting), { threshold: 0.2 });
+    io.observe(sign);
+    return () => io.disconnect();
+  }, []);
+
   const ask = async (raw: string) => {
     const question = raw.trim().slice(0, 400);
     if (!question || busy) return;
@@ -96,7 +107,8 @@ export default function AskChat() {
 
   return (
     <>
-      <button className={`ask-launch fill-btn${askOpen ? " away" : ""}`} aria-controls="ask" aria-expanded={askOpen} onClick={() => setAskOpen(true)}>
+      <button className={`ask-launch fill-btn${askOpen || tucked ? " away" : ""}`} aria-controls="ask" aria-expanded={askOpen} onClick={() => setAskOpen(true)}
+        tabIndex={tucked && !askOpen ? -1 : undefined}>
         <span className="fill" /><span className="av" aria-hidden="true" />
         <span className="lbl"><span className="full">Ask about Abhishek</span><span className="short">Ask me</span></span>
       </button>
