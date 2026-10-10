@@ -1,21 +1,16 @@
 import { MetadataRoute } from "next";
 
+// Only public pages belong here. /admin is blocked in robots.txt and marked noindex,
+// so listing it would show up as an error in Google Search Console.
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://abhishekgond.vercel.app";
-  const lastModified = new Date();
 
   return [
     {
       url: baseUrl,
-      lastModified,
+      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/admin/login`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.3,
     },
   ];
 }

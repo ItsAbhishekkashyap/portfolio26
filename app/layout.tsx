@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Abhishek Gond", url: SITE }],
   creator: "Abhishek Gond",
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  // Google Search Console "HTML tag" verification: paste only the content="..." value into GOOGLE_SITE_VERIFICATION.
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
   openGraph: {
     title: "Abhishek Gond | AI & GenAI Engineer, Full-Stack Developer",
     description: "RAG systems, tool-calling agents and real-time apps. Open to 2027 SDE and AI engineering roles.",
