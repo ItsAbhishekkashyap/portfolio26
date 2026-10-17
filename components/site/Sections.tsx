@@ -130,6 +130,7 @@ function CountUp({ to, label }: { to: number; label: string }) {
 }
 
 export function Recognition() {
+  const go = useSectionLink();
   return (
     <section className="recog wrap" id="recognition">
       <div className="recog-inner">
@@ -146,7 +147,9 @@ export function Recognition() {
                 {r.body}
                 {r.links && (
                   <span className="rec-links">
-                    {r.links.map((l) => <a key={l.href} className="u-link" href={l.href} target="_blank" rel="noopener">{l.label} ↗</a>)}
+                    {r.links.map((l) => l.href.startsWith("#")
+                      ? <a key={l.href} className="u-link" href={l.href} onClick={(e) => go(e, l.href)}>{l.label} ↓</a>
+                      : <a key={l.href} className="u-link" href={l.href} target="_blank" rel="noopener">{l.label} ↗</a>)}
                   </span>
                 )}
               </p>

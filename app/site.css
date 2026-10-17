@@ -481,3 +481,43 @@ main > section.journey{padding-block:clamp(100px,12vw,180px);background:var(--pa
 /* Certificate links under a recognition row */
 .rec .rec-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:13.5px;color:var(--ink)}
 .rec:hover .rec-links{color:#fff}
+
+/* ───────── Certificates ───────── */
+.certs{padding-block:clamp(30px,4vw,60px) clamp(110px,12vw,180px)}
+.certs-inner{max-width:1440px;margin:0 auto}
+.cert-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(28px,3vw,44px) clamp(18px,2.4vw,36px)}
+.cert{margin:0;grid-column:span 2;display:flex;flex-direction:column;gap:18px;min-width:0}
+.cert.featured{grid-column:span 3}
+.cert-shot{position:relative;display:block;width:100%;padding:clamp(12px,1.6vw,24px);background:var(--paper-2);border-radius:6px;overflow:hidden;cursor:zoom-in}
+.cert-shot img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px;box-shadow:0 10px 30px rgba(27,28,32,.08);transition:transform .7s var(--ease),box-shadow .7s var(--ease)}
+.cert-shot:hover img,.cert-shot:focus-visible img{transform:translateY(-6px) rotate(-.6deg) scale(1.015);box-shadow:0 26px 50px rgba(27,28,32,.16)}
+.cert-zoom{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;transform:scale(0);transition:transform .45s var(--ease);pointer-events:none}
+.cert-shot:hover .cert-zoom,.cert-shot:focus-visible .cert-zoom{transform:scale(1)}
+.cert figcaption{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:16px}
+.cert-row{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.cert h3{font-size:clamp(26px,2.6vw,40px);letter-spacing:-.035em;line-height:1.05}
+.cert.featured h3{font-size:clamp(32px,3.4vw,54px)}
+.cert-level{font-size:12px;border-radius:999px;padding:4px 11px;border:1px solid var(--line);color:var(--ink-2)}
+.cert-level.intermediate{border-color:var(--ink);color:var(--ink)}
+.cert-level.advanced{background:var(--accent);border-color:var(--accent);color:#fff}
+.cert-date,.cert-id{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.cert-verify{font-size:14px}
+
+/* full-size certificate viewer (portalled to <body>) */
+.cert-view{position:fixed;inset:0;z-index:170;background:rgba(10,11,14,.84);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) var(--gutter) calc(20px + env(safe-area-inset-bottom,0px));opacity:0;pointer-events:none;transition:opacity .45s var(--ease)}
+.cert-view.open{opacity:1;pointer-events:auto}
+.cert-view-inner{width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;gap:16px;animation:certIn .55s var(--ease-out) both}
+@keyframes certIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+.cert-view-inner img{width:100%;max-height:calc(100dvh - 170px);object-fit:contain;border-radius:6px}
+.cert-view-bar{display:flex;justify-content:space-between;align-items:center;gap:14px 20px;flex-wrap:wrap;color:#fff}
+.cert-view-bar b{display:block;font-weight:500;font-size:18px}
+.cert-view-bar span{font-size:13px;color:var(--on-night-mute)}
+.cert-view-actions{display:flex;gap:10px;align-items:center}
+.cert-view .pill{padding:12px 22px;font-size:14px}
+.cert-view .close-btn{border-color:var(--night-line);color:#fff;background:transparent}
+
+@media (max-width:820px){
+  .cert-grid{grid-template-columns:1fr}
+  .cert,.cert.featured{grid-column:auto}
+  .cert.featured h3{font-size:clamp(28px,8vw,40px)}
+}

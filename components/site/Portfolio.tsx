@@ -8,6 +8,7 @@ import { Preloader, Header, MenuNav } from "./Chrome";
 import Hero from "./Hero";
 import { Intro, Proof, Journey, Recognition, Toolkit } from "./Sections";
 import Work from "./Work";
+import Certificates from "./Certificates";
 import Footer, { Curve } from "./Footer";
 import Drawers from "./Drawers";
 import AskChat from "./AskChat";
@@ -49,6 +50,7 @@ function Page({ projects, also }: { projects: Project[]; also: Project[] }) {
         <Proof />
         <Journey />
         <Recognition />
+        <Certificates />
         <Toolkit />
         <Curve />
       </main>

@@ -250,16 +250,32 @@ export const RECOGNITION: RecognitionItem[] = [
   { big: "3rd", title: "Smart India Hackathon, internal round", body: "AGNI.AI, a disaster response system built on NASA FIRMS satellite data.", when: "Sep 2026" },
   { big: "450+", count: 450, title: "LeetCode & GeeksforGeeks", body: "DSA problems over 100+ active days, focused on time and space complexity.", when: "Profile", href: PROFILE.socials.leetcode },
   {
-    big: "3×", title: "HackerRank certified", when: "Oct 2026",
-    body: "Certified in SQL (Advanced), REST API (Intermediate) and Problem Solving (Intermediate).",
-    links: [
-      { label: "SQL", href: "https://www.hackerrank.com/certificates/e7f1b781232c" },
-      { label: "REST API", href: "https://www.hackerrank.com/certificates/3aa853909f48" },
-      { label: "Problem Solving", href: "https://www.hackerrank.com/certificates/bfa545d70b23" },
-    ],
+    big: "5×", title: "HackerRank certified", when: "Oct 2026",
+    body: "SQL at Basic, Intermediate and Advanced level, plus REST API and Problem Solving (Intermediate).",
+    links: [{ label: "See the certificates", href: "#certificates" }],
   },
   { big: "Silver", title: "Open National Taekwondo Championship", body: "Green 1 belt with 3+ years of training; senior member and mentor at the college club.", when: "Athletics" },
 ];
+
+export interface Certificate {
+  skill: string;
+  level: "Basic" | "Intermediate" | "Advanced";
+  issued: string;
+  id: string;
+  image: string;
+  featured?: boolean;
+}
+
+const verifyUrl = (id: string) => `https://www.hackerrank.com/certificates/${id.toLowerCase()}`;
+
+// HackerRank skill certificates; ids are printed on each certificate and open its public verify page.
+export const CERTIFICATES: (Certificate & { href: string })[] = ([
+  { skill: "SQL", level: "Advanced", issued: "17 Oct 2026", id: "E7F1B781232C", image: "hackerrank-sql-advanced", featured: true },
+  { skill: "REST API", level: "Intermediate", issued: "17 Oct 2026", id: "3AA853909F48", image: "hackerrank-rest-api-intermediate", featured: true },
+  { skill: "Problem Solving", level: "Intermediate", issued: "16 Oct 2026", id: "BFA545D70B23", image: "hackerrank-problem-solving-intermediate" },
+  { skill: "SQL", level: "Intermediate", issued: "17 Oct 2026", id: "E1118076DDA0", image: "hackerrank-sql-intermediate" },
+  { skill: "SQL", level: "Basic", issued: "17 Oct 2026", id: "E4206AECFF6A", image: "hackerrank-sql-basic" },
+] as Certificate[]).map((c) => ({ ...c, href: verifyUrl(c.id) }));
 
 export const TOOLKIT: { group: string; items: string[] }[] = [
   { group: "Languages", items: ["Python", "C++", "JavaScript", "TypeScript", "SQL"] },
