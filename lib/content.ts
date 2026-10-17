@@ -72,7 +72,7 @@ export const PROJECTS: Project[] = [
     shots: { url: "ayunidan.vercel.app", cover: "ayunidan-hero", gallery: [["ayunidan-hero", "Landing page"], ["ayunidan-dashboard", "Clinical overview with risk tiers and the live RAG index"], ["ayunidan-intake", "Patient intake from a PDF, an image or a voice note"], ["ayunidan-architecture", "Platform architecture"]] },
   },
   {
-    id: "gridsense", title: "GridSense", subtitle: "AI IoT telemetry gateway", cat: "AI & IoT", color: "#2b150c", chip: "Readings every 2 s", file: "agent.ts",
+    id: "gridsense", title: "GridSense", subtitle: "AI solar panel monitoring platform", cat: "AI & IoT", color: "#2b150c", chip: "Readings every 2 s", file: "agent.ts",
     desc: "A real-time gateway that streams solar panel telemetry over Socket.IO and lets users query it through a LangGraph agent that calls typed Prisma tools instead of writing SQL.",
     tech: ["Next.js", "Node.js", "PostgreSQL", "Socket.IO", "Prisma", "pgvector"], live: "https://gridsenseai.vercel.app/", gh: GH,
     specs: [["Streaming", "Socket.IO, simulated readings every 2 s to per-user rooms"], ["Writes", "30 readings per panel batched into one Prisma write a minute"], ["Agent", "LangGraph tool-calling loop on Groq Llama 3.1 8B"], ["Retrieval", "pgvector over 384-d MiniLM embeddings"], ["Auth", "Rotating httpOnly refresh tokens, 15-min JWTs"], ["Payments", "Razorpay HMAC-SHA256 with an atomic Prisma transaction"]],
@@ -239,26 +239,35 @@ export const JOURNEY: JourneyItem[] = [
     tags: [],
   },
   {
-    when: "2023 – 2027 (expected)", kind: "Education", role: "B.Tech, Electronics & Communication", org: "Institute of Engineering and Technology, Lucknow. CGPA 7.85 / 10",
+    when: "2023 – 2027 (expected)", kind: "Education", role: "B.Tech, Electronics & Communication", org: "Institute of Engineering and Technology, Lucknow. CGPA 7.85 / 10 (Class XII 83.6%, Class X 83.8%)",
     points: [], tags: [],
   },
 ];
 
-export interface RecognitionItem { big: string; count?: number; title: string; body: string; when: string; href?: string }
+export interface RecognitionItem { big: string; count?: number; title: string; body: string; when: string; href?: string; links?: { label: string; href: string }[] }
 export const RECOGNITION: RecognitionItem[] = [
   { big: "Top 30", title: "Hack Devengers 1.0", body: "CodeRAG Vector, a RAG-grounded repository audit pipeline, out of 4,200+ participants.", when: "Aug 2026" },
   { big: "3rd", title: "Smart India Hackathon, internal round", body: "AGNI.AI, a disaster response system built on NASA FIRMS satellite data.", when: "Sep 2026" },
   { big: "450+", count: 450, title: "LeetCode & GeeksforGeeks", body: "DSA problems over 100+ active days, focused on time and space complexity.", when: "Profile", href: PROFILE.socials.leetcode },
+  {
+    big: "3×", title: "HackerRank certified", when: "Oct 2026",
+    body: "Certified in SQL (Advanced), REST API (Intermediate) and Problem Solving (Intermediate).",
+    links: [
+      { label: "SQL", href: "https://www.hackerrank.com/certificates/e7f1b781232c" },
+      { label: "REST API", href: "https://www.hackerrank.com/certificates/3aa853909f48" },
+      { label: "Problem Solving", href: "https://www.hackerrank.com/certificates/bfa545d70b23" },
+    ],
+  },
   { big: "Silver", title: "Open National Taekwondo Championship", body: "Green 1 belt with 3+ years of training; senior member and mentor at the college club.", when: "Athletics" },
 ];
 
 export const TOOLKIT: { group: string; items: string[] }[] = [
   { group: "Languages", items: ["Python", "C++", "JavaScript", "TypeScript", "SQL"] },
   { group: "AI/ML & GenAI", items: ["LLMs", "RAG", "LangChain", "LangGraph", "AI agents", "Vector search", "Machine learning"] },
-  { group: "Frontend", items: ["React.js", "Next.js", "Tailwind CSS", "HTML/CSS", "Streamlit"] },
+  { group: "Frontend", items: ["React.js", "Next.js", "Tailwind CSS", "HTML/CSS", "Framer Motion", "GSAP", "Lenis"] },
   { group: "Backend", items: ["Node.js", "Express.js", "FastAPI", "REST APIs", "Socket.IO"] },
   { group: "Databases", items: ["PostgreSQL", "MySQL", "MongoDB", "Redis", "Prisma", "pgvector", "ChromaDB", "Pinecone"] },
-  { group: "Tools & core CS", items: ["Git", "Docker", "CI/CD", "OOP", "DBMS", "Operating systems", "Computer networks"] },
+  { group: "Tools & core CS", items: ["Git", "Docker", "CI/CD", "pytest", "OOP", "DBMS", "Operating systems", "Computer networks"] },
 ];
 
 export const NAV = [

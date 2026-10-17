@@ -142,7 +142,14 @@ export function Recognition() {
             <li className="rec" key={r.title}>
               {r.count ? <CountUp to={r.count} label={r.big} /> : <span className="big">{r.big}</span>}
               <h3>{r.title}</h3>
-              <p>{r.body}</p>
+              <p>
+                {r.body}
+                {r.links && (
+                  <span className="rec-links">
+                    {r.links.map((l) => <a key={l.href} className="u-link" href={l.href} target="_blank" rel="noopener">{l.label} ↗</a>)}
+                  </span>
+                )}
+              </p>
               <span className="when">{r.href ? <a className="u-link" href={r.href} target="_blank" rel="noopener">{r.when}</a> : r.when}</span>
             </li>
           ))}

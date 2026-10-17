@@ -477,3 +477,7 @@ main > section.journey{padding-block:clamp(100px,12vw,180px);background:var(--pa
 /* Quiet link to the admin Studio, last item in the menu footer */
 .menu-foot .menu-admin{color:var(--on-night-mute)}
 .menu-foot .menu-admin:hover{color:var(--on-night)}
+
+/* Certificate links under a recognition row */
+.rec .rec-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:13.5px;color:var(--ink)}
+.rec:hover .rec-links{color:#fff}
